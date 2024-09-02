@@ -5,7 +5,6 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.openapi.docs import get_swagger_ui_oauth2_redirect_html, get_redoc_html, get_swagger_ui_html
-from fastapi.templating import Jinja2Templates
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from pydantic import AnyHttpUrl
@@ -14,9 +13,8 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from src.PROJ.api.api_JOBS import r_jobs, r_secure
-from src.PROJ.api.api_MAIN_URLS import main_router
-from src.PROJ.api.api_security import r_sec
+from src.PROJ.api.api_main import r_jobs, r_private
+from src.PROJ.api.api_security import r_jwt
 from src.PROJ.core.db import init_models, async_session_factory
 from src.PROJ.core.limiter import limiter
 
@@ -86,6 +84,7 @@ app = FastAPI(
 )
 
 
+# fix for static load issues
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
@@ -150,10 +149,10 @@ from slowapi import _rate_limit_exceeded_handler
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-app.include_router(main_router)
-app.include_router(r_secure)
+# app.include_router(main_router)
+app.include_router(r_private)
 app.include_router(r_jobs)
-app.include_router(r_sec)
+app.include_router(r_jwt)
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
 
 def api_run(_class=None):
@@ -164,9 +163,4 @@ def api_run(_class=None):
 
 
 if __name__ == "__main__":
-    # from rich import pretty
-    # from rich.traceback import install
-    # pretty.install()
-    # install(show_locals=True)
-
     api_run()
