@@ -10,8 +10,9 @@
 Парсер вакансий телеграм-каналов
 
 ## Пример использования
-1. Получить сессию pyrogram
+1. Получить сессию pyrogram, сохранить в src/PROJ/service_pyrogram
 2. Заполнить env файл
+3. python3 src/PROJ/api/app.py
 
 ## URLs:
 

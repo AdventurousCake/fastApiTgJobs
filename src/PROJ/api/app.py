@@ -15,7 +15,6 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from src.PROJ.api.api_main import r_jobs, r_private
-from src.PROJ.api.api_jwt_cookie import r_jwt
 from src.PROJ.core.db import init_models, async_session_factory
 from src.PROJ.core.limiter import limiter
 from src.PROJ.service_pyrogram.main_scheduler import run
@@ -37,7 +36,7 @@ log = logging.getLogger("rich")
 
 scheduler = AsyncIOScheduler()
 def schedule_jobs():
-    scheduler.add_job(run, "interval", seconds=60, id="my_job_id")
+    scheduler.add_job(run, "interval", seconds=70, id="my_job_id")
 
 
 @asynccontextmanager
@@ -59,7 +58,7 @@ async def on_startup():
     # log.warning("skip db init; USE ALEMBIC\n")
     await init_models(drop=True)
 
-    log.warning('[bold red blink]starting scheduler[/]', extra={"markup": True})
+    log.warning('[bold red]starting scheduler[/]', extra={"markup": True})
 
     # init scheduler
     schedule_jobs()
@@ -153,7 +152,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # app.include_router(main_router)
 app.include_router(r_private)
 app.include_router(r_jobs)
-app.include_router(r_jwt)
+# app.include_router(r_jwt)
 
 
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])

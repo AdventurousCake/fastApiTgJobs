@@ -18,7 +18,7 @@ templates = Jinja2Templates(BASE_DIR / "templates")
 """type: str = Query(None, max_length=100)"""
 """CommonsDep = Annotated[dict, Depends(common_parameters)]"""
 
-r_jobs = APIRouter(prefix="/jobs", tags=["📗 Jobs"], dependencies=None)
+r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 r_private = APIRouter(prefix="/private", tags=["🔐 private URLS"], dependencies=None)
 
 
@@ -39,7 +39,6 @@ def filter_params(filter_by: str = Query(None), filter_value: int = Query(None))
 #     data = await JobsDataRepository.get_all(**params)
 #     return [m.to_dict() for m in data]
 
-@limiter.limit("5/minute")
 @cache(expire=60)
 @r_jobs.get("/jobs_all", response_model=list[VacancyData])
 async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)):
@@ -47,7 +46,6 @@ async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)
     return data
 
 
-@limiter.limit("5/minute")
 @cache(expire=60)
 @r_jobs.get("/hrs_all", response_model=list[SHr])
 async def hrs_all(request: Request, params=Depends(filter_params)):
