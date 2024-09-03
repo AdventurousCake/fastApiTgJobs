@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.openapi.docs import get_swagger_ui_oauth2_redirect_html, get_redoc_html, get_swagger_ui_html
 from fastapi_cache import FastAPICache
@@ -14,15 +15,16 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from src.PROJ.api.api_main import r_jobs, r_private
-from src.PROJ.api.api_security import r_jwt
+from src.PROJ.api.api_jwt_cookie import r_jwt
 from src.PROJ.core.db import init_models, async_session_factory
 from src.PROJ.core.limiter import limiter
+from src.PROJ.service_pyrogram.main_scheduler import run
 
 logging.basicConfig(
     level="INFO",
     format="%(message)s",
     datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)], # markup=True
+    handlers=[RichHandler(rich_tracebacks=True)],  # markup=True
     # handlers=[RichHandler(rich_tracebacks=True, console=console)],
 )
 # FORMAT = "%(message)s"
@@ -33,10 +35,10 @@ logging.basicConfig(
 # init_logging()
 log = logging.getLogger("rich")
 
-# scheduler = AsyncIOScheduler()
-# def schedule_jobs():
-#     scheduler.add_job(f123, "interval", seconds=60, id="my_job_id")
-#     # scheduler.add_job(run_bg_tasks, "interval", seconds=10, id="my_job_id")
+scheduler = AsyncIOScheduler()
+def schedule_jobs():
+    scheduler.add_job(run, "interval", seconds=60, id="my_job_id")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,8 +62,8 @@ async def on_startup():
     log.warning('[bold red blink]starting scheduler[/]', extra={"markup": True})
 
     # init scheduler
-    # schedule_jobs()
-    # scheduler.start()
+    schedule_jobs()
+    scheduler.start()
 
     # init cache
     # redis = aioredis.from_url("redis://localhost")
@@ -71,8 +73,7 @@ async def on_startup():
 
 
 async def on_shutdown():
-    pass
-    # scheduler.shutdown()
+    scheduler.shutdown()
 
 
 app = FastAPI(
@@ -122,7 +123,6 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 session = async_session_factory
 session_async = async_session_factory
 
-
 origins: list[AnyHttpUrl] = [
     "http://localhost:8000",
     # "http://myfastapi7.ddns.net",
@@ -146,6 +146,7 @@ app.add_middleware(
 
 # LIMIT
 from slowapi import _rate_limit_exceeded_handler
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -153,6 +154,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(r_private)
 app.include_router(r_jobs)
 app.include_router(r_jwt)
+
+
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
 
 def api_run(_class=None):
