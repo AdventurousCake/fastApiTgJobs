@@ -36,7 +36,8 @@ log = logging.getLogger("rich")
 
 scheduler = AsyncIOScheduler()
 def schedule_jobs():
-    scheduler.add_job(run, "interval", seconds=70, id="my_job_id")
+    scheduler.add_job(run, id="first_run")  # first run
+    scheduler.add_job(run, "interval", seconds=3600, id="my_job_id")
 
 
 @asynccontextmanager
@@ -154,13 +155,10 @@ app.include_router(r_private)
 app.include_router(r_jobs)
 # app.include_router(r_jwt)
 
-
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
 
-def api_run(_class=None):
-    global using
-    using = _class
 
+def api_run():
     uvicorn.run(app, host="localhost", port=8000, log_level="debug")  # log_level="info" # host="0.0.0.0", port=80
 
 

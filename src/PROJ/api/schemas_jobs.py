@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, computed_field, field_serializer
 
 
 class VacancyData(BaseModel):
-    """v03.09"""
+    """v04.09"""
 
     level: bool
     remote: bool
@@ -22,6 +22,7 @@ class VacancyData(BaseModel):
     posted_at: datetime
     msg_url: str
     chat_username: str
+    chat_id: int
     views: Optional[int]
     button_url: Optional[str] = Field(default=None)
 
@@ -34,11 +35,11 @@ class VacancyData(BaseModel):
         if self.msg_url:
             return self.msg_url.split("/")[3]
 
-    @computed_field
-    @cached_property
-    def posted_at_date_ru(self) -> str:
-        """for excel"""
-        return self.posted_at.strftime("%d/%m/%Y %H:%M")
+    # @computed_field
+    # @cached_property
+    # def posted_at_date_ru(self) -> str:
+    #     """for excel"""
+    #     return self.posted_at.strftime("%d/%m/%Y %H:%M")
 
     # or .model_dump()
     def as_dict(self) -> dict[str, str | int]:

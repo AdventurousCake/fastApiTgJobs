@@ -71,11 +71,12 @@ class Jobs(Base):
     user_image_url: Mapped[str_256 | None]
     msg_url: Mapped[str_256 | None]
     chat_username: Mapped[str_256 | None]
+    chat_id: Mapped[big_int | None]
     # chat_username: Mapped[str_256 | None] = mapped_column(Computed('msg_url'))
     views: Mapped[Optional[int]] = mapped_column(default=0)
     button_url: Mapped[str_256 | None]
 
-    user_tg_id: Mapped[int | None] = mapped_column(ForeignKey("hr.id", ondelete="CASCADE"))
+    user_tg_id: Mapped[big_int | None] = mapped_column(ForeignKey("hr.id", ondelete="CASCADE"))
     hr = relationship("HR", back_populates="jobs", lazy="joined")  # cascade="all, delete") # use_list=True
     # hr: Mapped['HR'] = relationship(back_populates="jobs")
 

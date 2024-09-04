@@ -141,6 +141,7 @@ class MessageParser:
                 message.from_user and message.from_user.photo) else None
 
         button_url = self.extract_button_url(message)
+        chat_id = message.chat.id
 
         try:
             v_data = VacancyData(
@@ -156,6 +157,7 @@ class MessageParser:
                 posted_at=message.date,
                 msg_url=message.link,
                 chat_username=chat_username,
+                chat_id=chat_id,
                 views=message.views,
                 button_url=button_url,
             )
@@ -271,9 +273,9 @@ class ScrapeVacancies:
 
         async with TelegramClient(SESSION_NAME, api_id, api_hash, phone_number, password) as client:
             # list of coroutines
-            tasks = [asyncio.wait_for(client.get_chat_data(chat, MSG_LIMIT),
+            tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),
                                       timeout=TASK_EXECUTION_TIME_LIMIT)
-                     for chat in self.target_chats]
+                     for chat_id in self.target_chats]
             # await выполнения функций, return:list of results [[VacancyData, ...]]
             chat_results: List[List[VacancyData] | Exception] = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -301,21 +303,23 @@ class ScrapeVacancies:
                 errors.append(result)
             else:
                 for message in result:
-                    hrs.update({message.user_tg_id: message.user_username})
+                    # check if channel
+                    user_tg_id = message.user_tg_id
+                    if not user_tg_id:
+                        user_tg_id = message.chat_id
+
+                    hrs.update({user_tg_id: message.user_username})
 
                     message.user_image_url = photos_.get(message.user_image_id)
-                    all_messages_new.append(message)
-                # all_messages_new.extend(result)
+                    all_messages_new.append(message.model_dump())
 
-        unique_count = len(set([m.msg_url for m in all_messages_new]))
-        logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}')
+        # unique_count = len(set([m.msg_url for m in all_messages_new]))
+        # logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
+        #                f'Unique HRs {len(hrs)}. Errors: {len(errors)}')
 
-        # all_messages_new = [message for chat_messages in results for message in chat_messages]
-        all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
+        # all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())
 
-        # await DataSaver.save_to_csv(all_messages_new)
         return dict(all_messages=all_messages_new, hr_data=hr_data)
 
 
@@ -326,10 +330,14 @@ class ImageDownloader:
             raise ValueError("File is empty")
 
         async with ClientSession() as session:
-            # await session.get(f"https://api.telegram.org/bot{tg_id}/getPhoto")
-
             url = 'https://telegra.ph/upload'
-            resp = await session.post(url, data={'key': f_bytes})
+
+            try:
+                resp = await session.post(url, data={'file': f_bytes})
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                return 'err'
+
             response = await resp.json()
             return 'https://telegra.ph' + response[0]['src']
 
