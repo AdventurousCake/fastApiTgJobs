@@ -4,6 +4,7 @@ import itertools
 import logging
 import re
 from datetime import datetime, timedelta
+from pprint import pprint
 from typing import Optional, List
 
 from aiohttp import ClientSession
@@ -334,12 +335,14 @@ class ImageDownloader:
 
             try:
                 resp = await session.post(url, data={'file': f_bytes})
+                response = await resp.json()
+                pprint(response)
+                return 'https://telegra.ph' + response[0]['src']
+
             except Exception as e:
                 logging.error(e, exc_info=True)
                 return 'err'
 
-            response = await resp.json()
-            return 'https://telegra.ph' + response[0]['src']
 
     @classmethod
     async def download(cls, file_ids: list):

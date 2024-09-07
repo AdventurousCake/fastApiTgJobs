@@ -1,12 +1,12 @@
 from datetime import datetime
 from functools import cached_property
-from typing import Optional
+from typing import Optional, Any
 
-from pydantic import BaseModel, Field, computed_field, field_serializer
+from pydantic import BaseModel, Field, computed_field, field_serializer, model_validator
 
 
 class VacancyData(BaseModel):
-    """v04.09"""
+    """v08.09"""
 
     level: bool
     remote: bool
@@ -44,6 +44,16 @@ class VacancyData(BaseModel):
     # or .model_dump()
     def as_dict(self) -> dict[str, str | int]:
         return self.__dict__
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_str_limits(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if k != 'text_' and isinstance(v, str):
+                    assert len(v) <= 256, f'{k} is too long. len: {len(v)}. {v}'
+
+        return data
 
 
 class SHr(BaseModel):

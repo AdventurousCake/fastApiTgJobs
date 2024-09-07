@@ -14,6 +14,7 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
+from src.PROJ.api.api_html import html_router
 from src.PROJ.api.api_main import r_jobs, r_private
 from src.PROJ.core.db import init_models, async_session_factory
 from src.PROJ.core.limiter import limiter
@@ -36,6 +37,7 @@ log = logging.getLogger("rich")
 
 scheduler = AsyncIOScheduler()
 def schedule_jobs():
+    logging.warning('add tasks for scheduler')
     scheduler.add_job(run, id="first_run")  # first run
     scheduler.add_job(run, "interval", seconds=3600, id="my_job_id")
 
@@ -151,6 +153,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # app.include_router(main_router)
+app.include_router(html_router)
 app.include_router(r_private)
 app.include_router(r_jobs)
 # app.include_router(r_jwt)
