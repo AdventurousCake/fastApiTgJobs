@@ -3,16 +3,16 @@ import csv
 import itertools
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pprint import pprint
 from typing import Optional, List
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, FormData
 from pydantic import ValidationError
 from pyrogram import Client
 from pyrogram.types import Message
 
-from src.PROJ.service_pyrogram.pyro_config import api_id, api_hash, phone_number, password
+from src.PROJ.service_pyrogram.pyro_config import api_id, api_hash, phone_number, password, SESSION_STRING
 from src.PROJ.api.schemas_jobs import VacancyData
 
 # import uvloop
@@ -32,12 +32,12 @@ from src.PROJ.api.schemas_jobs import VacancyData
 # )
 logger = logging.getLogger(__name__)
 
-
 MSG_LIMIT = 500
-MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)
+MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
 SESSION_NAME = "my_account_MEGAFON"
 PASS_SENIORS_TMP = True
 TASK_EXECUTION_TIME_LIMIT = 60 * 5
+
 
 class MsgFilter:
     @staticmethod
@@ -207,8 +207,14 @@ class DataSaver:
 
 
 class TelegramClient:
-    def __init__(self, session_name: str, api_id: int, api_hash: str, phone_number: str, password: str):
-        self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
+    def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
+                 password: str = None, session_string: str = None):
+        if not session_name:
+            logger.info("Starting in memory session client")
+            self.client = Client(":memory:", session_string=session_string)
+
+        else:
+            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
 
     async def __aenter__(self):
         await self.client.start()
@@ -253,10 +259,10 @@ class ScrapeVacancies:
                 -1001328702818,
                 -1001049086457,
                 -1001154585596,
-                -1001292405242,
-                -1001650380394,
-                -1001850397538,
-                -1001164103043,  # new
+                # -1001292405242,
+                # -1001650380394,
+                # -1001850397538,
+                # -1001164103043,  # new
             ]
         self.target_chats = target_chats
 
@@ -272,7 +278,12 @@ class ScrapeVacancies:
                        f"Target chats: {self.target_chats}\n"
                        f"======================================")
 
-        async with TelegramClient(SESSION_NAME, api_id, api_hash, phone_number, password) as client:
+        async with TelegramClient(session_string=SESSION_STRING) as client:
+            # async with TelegramClient(SESSION_NAME, api_id, api_hash, phone_number, password) as client:
+
+            c_data = await client.client.get_me()
+            logger.warning(f"Bot id: {c_data.id}; Name: {c_data.first_name}")
+
             # list of coroutines
             tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),
                                       timeout=TASK_EXECUTION_TIME_LIMIT)
@@ -284,7 +295,7 @@ class ScrapeVacancies:
             # upd: separate load user photos
 
             images_ids = set([message.user_image_id for message in chat_results_flat])
-            photos_ = await ImageDownloader.upload(images_ids, client)
+            photos_ = await ImageDownloader().upload(images_ids, client)
 
         # not separated by chats
         all_messages_new: List[VacancyData] = []
@@ -312,7 +323,7 @@ class ScrapeVacancies:
                     hrs.update({user_tg_id: message.user_username})
 
                     message.user_image_url = photos_.get(message.user_image_id)
-                    all_messages_new.append(message.model_dump())
+                    all_messages_new.append(message)  # message.model_dump()
 
         # unique_count = len(set([m.msg_url for m in all_messages_new]))
         # logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
@@ -325,31 +336,46 @@ class ScrapeVacancies:
 
 
 class ImageDownloader:
-    @staticmethod
-    async def upload_to_tgraph(f_bytes):
-        if not f_bytes:
-            raise ValueError("File is empty")
 
+    async def upload_to_tgraph(self, f_bytes):
         async with ClientSession() as session:
             url = 'https://telegra.ph/upload'
 
-            try:
-                resp = await session.post(url, data={'file': f_bytes})
-                response = await resp.json()
-                pprint(response)
-                return 'https://telegra.ph' + response[0]['src']
+            resp = await session.post(url, data={'file': f_bytes})
+            response = await resp.json()
+            pprint(response)
+            return 'https://telegra.ph' + response[0]['src']
 
-            except Exception as e:
-                logging.error(e, exc_info=True)
-                return 'err'
+    async def upload_to_catbox(self, f_bytes):
+        async with ClientSession() as session:
+            url = 'https://catbox.moe/user/api.php'
 
+            data = FormData()
+            data.add_field('reqtype', 'fileupload')
+            data.add_field('userhash', '')
+            data.add_field('fileToUpload', f_bytes, filename='img.jpg', content_type='image/jpeg')
+
+            resp = await session.post(url, data=data)
+            response = await resp.text()
+            return response
+
+    async def uploader(self, f_bytes):
+        if not f_bytes:
+            raise ValueError("File is empty")
+
+        try:
+            # await self.upload_to_tgraph(f_bytes)
+            await self.upload_to_catbox(f_bytes)
+        except Exception as e:
+            logging.error(msg=f'Error in upload img: {e}', exc_info=True)
+            return 'err_upl'
 
     @classmethod
     async def download(cls, file_ids: list):
         pass
 
-    @classmethod
-    async def upload(cls, file_ids: list, client: TelegramClient) -> dict:
+    # @classmethod
+    async def upload(self, file_ids: list, client: TelegramClient) -> dict:
         files_dict = {}
         for file_id in file_ids:
             if file_id is None:
@@ -358,8 +384,8 @@ class ImageDownloader:
             try:
                 file = await client.client.download_media(file_id, in_memory=True)  # block=False breaks program
                 file_bytes = bytes(file.getbuffer())
-                tgraph_url = await cls.upload_to_tgraph(file_bytes)
-                files_dict.update({file_id: tgraph_url})
+                img_url = await self.uploader(file_bytes)
+                files_dict.update({file_id: img_url})
 
             except ValueError:
                 logging.info(f"File not found (None): {file_id}")
