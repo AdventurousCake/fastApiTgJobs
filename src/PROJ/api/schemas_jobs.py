@@ -48,6 +48,7 @@ class VacancyData(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def check_str_limits(cls, data: Any) -> Any:
+        "db limits"
         if isinstance(data, dict):
             for k, v in data.items():
                 if k != 'text_' and isinstance(v, str):

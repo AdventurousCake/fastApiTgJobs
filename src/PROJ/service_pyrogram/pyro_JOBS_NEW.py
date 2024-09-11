@@ -12,8 +12,9 @@ from pydantic import ValidationError
 from pyrogram import Client
 from pyrogram.types import Message
 
-from src.PROJ.service_pyrogram.pyro_config import api_id, api_hash, phone_number, password, SESSION_STRING
+# from src.PROJ.service_pyrogram.pyro_config_OLD import api_id, api_hash, phone_number, password, SESSION_STRING
 from src.PROJ.api.schemas_jobs import VacancyData
+from src.PROJ.core.config import TG_SESSION_STRING
 
 # import uvloop
 # uvloop.install()
@@ -143,6 +144,12 @@ class MessageParser:
 
         button_url = self.extract_button_url(message)
         chat_id = message.chat.id
+        
+        tags = self.extract_tags(text_low)
+        # todo
+        print(tags)
+        
+        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ]+', repl='', string=text_low)  # #\w+
 
         try:
             v_data = VacancyData(
@@ -185,6 +192,11 @@ class MessageParser:
         if message.reply_markup and message.reply_markup.inline_keyboard:
             return message.reply_markup.inline_keyboard[0][0].url
         return None
+    
+    @staticmethod
+    def extract_tags(text: str) -> List[str]:
+        pattern = r"#[\wа-яА-ЯёЁ]+"
+        return [tag.strip() for tag in re.findall(pattern, text)]
 
 
 class DataSaver:
@@ -278,7 +290,7 @@ class ScrapeVacancies:
                        f"Target chats: {self.target_chats}\n"
                        f"======================================")
 
-        async with TelegramClient(session_string=SESSION_STRING) as client:
+        async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             # async with TelegramClient(SESSION_NAME, api_id, api_hash, phone_number, password) as client:
 
             c_data = await client.client.get_me()
@@ -337,7 +349,7 @@ class ScrapeVacancies:
 
 class ImageDownloader:
 
-    async def upload_to_tgraph(self, f_bytes):
+    async def _upload_to_tgraph(self, f_bytes):
         async with ClientSession() as session:
             url = 'https://telegra.ph/upload'
 
@@ -346,7 +358,7 @@ class ImageDownloader:
             pprint(response)
             return 'https://telegra.ph' + response[0]['src']
 
-    async def upload_to_catbox(self, f_bytes):
+    async def _upload_to_catbox(self, f_bytes):
         async with ClientSession() as session:
             url = 'https://catbox.moe/user/api.php'
 
@@ -365,7 +377,7 @@ class ImageDownloader:
 
         try:
             # await self.upload_to_tgraph(f_bytes)
-            await self.upload_to_catbox(f_bytes)
+            await self._upload_to_catbox(f_bytes)
         except Exception as e:
             logging.error(msg=f'Error in upload img: {e}', exc_info=True)
             return 'err_upl'
