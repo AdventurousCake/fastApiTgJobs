@@ -146,10 +146,10 @@ class MessageParser:
         chat_id = message.chat.id
         
         tags = self.extract_tags(text_low)
-        # todo
         print(tags)
-        
-        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ]+', repl='', string=text_low)  # #\w+
+
+        # todo
+        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ]+', repl='', string=text)  # #\w+
 
         try:
             v_data = VacancyData(
@@ -157,7 +157,7 @@ class MessageParser:
                 remote=remote,
                 startup=startup,
                 is_bigtech=is_bigtech,
-                text_=text,
+                text_=text_cleaned,
                 contacts=contacts,
                 user_username=username,
                 user_tg_id=user_tg_id,
@@ -270,7 +270,7 @@ class ScrapeVacancies:
             target_chats = [
                 -1001328702818,
                 -1001049086457,
-                -1001154585596,
+                # -1001154585596,
                 # -1001292405242,
                 # -1001650380394,
                 # -1001850397538,
@@ -287,7 +287,7 @@ class ScrapeVacancies:
                        f"{MSG_LIMIT=}; MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}\n"
                        f"======================================\n"
                        f"Pass seniors(temporary): {PASS_SENIORS_TMP}\n"
-                       f"Target chats: {self.target_chats}\n"
+                       f"Target chats (({len(self.target_chats)})): {self.target_chats}\n"
                        f"======================================")
 
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
@@ -355,6 +355,9 @@ class ImageDownloader:
 
             resp = await session.post(url, data={'file': f_bytes})
             response = await resp.json()
+
+            if str(response) == 'Unknown error':
+                logger.error('tg error: ' + response)
             pprint(response)
             return 'https://telegra.ph' + response[0]['src']
 
@@ -376,8 +379,8 @@ class ImageDownloader:
             raise ValueError("File is empty")
 
         try:
-            # await self.upload_to_tgraph(f_bytes)
-            await self._upload_to_catbox(f_bytes)
+            # return await self._upload_to_tgraph(f_bytes)
+            return await self._upload_to_catbox(f_bytes)
         except Exception as e:
             logging.error(msg=f'Error in upload img: {e}', exc_info=True)
             return 'err_upl'
@@ -389,7 +392,9 @@ class ImageDownloader:
     # @classmethod
     async def upload(self, file_ids: list, client: TelegramClient) -> dict:
         files_dict = {}
-        for file_id in file_ids:
+        # for file_id in file_ids:
+        while file_ids:
+            file_id = file_ids.pop()
             if file_id is None:
                 continue
 
@@ -400,7 +405,7 @@ class ImageDownloader:
                 files_dict.update({file_id: img_url})
 
             except ValueError:
-                logging.info(f"File not found (None): {file_id}")
+                logging.error(f"File not found (None): {file_id}")
                 continue
 
         return files_dict
