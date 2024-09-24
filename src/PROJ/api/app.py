@@ -39,7 +39,7 @@ scheduler = AsyncIOScheduler()
 def schedule_jobs():
     logging.warning('add tasks for scheduler ONLY first_run')
     scheduler.add_job(run, id="first_run")  # first run
-    # scheduler.add_job(run, "interval", seconds=3600, id="my_job_id")
+    scheduler.add_job(run, "interval", seconds=3600, id="my_job_id")
 
 
 @asynccontextmanager

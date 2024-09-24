@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, UTC
 from pprint import pprint
 from typing import Optional, List
 
+import httpx
 from aiohttp import ClientSession, FormData
 from pydantic import ValidationError
 from pyrogram import Client
@@ -144,12 +145,12 @@ class MessageParser:
 
         button_url = self.extract_button_url(message)
         chat_id = message.chat.id
-        
-        tags = self.extract_tags(text_low)
-        print(tags)
 
-        # todo
-        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ]+', repl='', string=text)  # #\w+
+        # tags = self.extract_tags(text_low)
+        # print(tags)
+
+        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
+        text_cleaned = text_cleaned.lstrip()
 
         try:
             v_data = VacancyData(
@@ -192,7 +193,7 @@ class MessageParser:
         if message.reply_markup and message.reply_markup.inline_keyboard:
             return message.reply_markup.inline_keyboard[0][0].url
         return None
-    
+
     @staticmethod
     def extract_tags(text: str) -> List[str]:
         pattern = r"#[\wа-яА-ЯёЁ]+"
@@ -362,16 +363,30 @@ class ImageDownloader:
             return 'https://telegra.ph' + response[0]['src']
 
     async def _upload_to_catbox(self, f_bytes):
-        async with ClientSession() as session:
-            url = 'https://catbox.moe/user/api.php'
+        url = 'https://catbox.moe/user/api.php'
 
-            data = FormData()
-            data.add_field('reqtype', 'fileupload')
-            data.add_field('userhash', '')
-            data.add_field('fileToUpload', f_bytes, filename='img.jpg', content_type='image/jpeg')
+        # async with ClientSession() as session:
+        #     data = FormData()
+        #     data.add_field('reqtype', 'fileupload')
+        #     data.add_field('userhash', '')
+        #     data.add_field('fileToUpload', f_bytes, filename='img.jpg', content_type='image/jpeg')
+        #
+        #     resp = await session.post(url, data=data)
+        #     response = await resp.text()
+        #     return response
 
-            resp = await session.post(url, data=data)
-            response = await resp.text()
+        async with httpx.AsyncClient() as client:
+            files = {
+                'fileToUpload': ('img.jpg', f_bytes, 'image/jpeg')
+            }
+
+            data = {
+                'reqtype': 'fileupload',
+                'userhash': ''
+            }
+
+            resp = await client.post(url, files=files, data=data, timeout=10)
+            response = resp.text
             return response
 
     async def uploader(self, f_bytes):
