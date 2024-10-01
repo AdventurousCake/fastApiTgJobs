@@ -37,8 +37,8 @@ async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)
 
 @cache(expire=60)
 @r_jobs.get("/hrs_all", response_model=list[SHr])
-async def hrs_all(request: Request, params=Depends(filter_params)):
-    data = await HrDataRepository.get_all()
+async def hrs_all(params=Depends(filter_params)):
+    data = await HrDataRepository.get_all(**params)
     return data
 
-# tst shelf
+# tst endpoints shelf

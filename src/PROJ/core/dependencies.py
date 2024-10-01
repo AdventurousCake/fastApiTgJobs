@@ -10,4 +10,7 @@ def filter_params0(filter_by: str = Query(None), filter_value: str = Query(None)
 
 
 def filter_params(filter_by: str = Query(None), filter_value: int = Query(None)) -> dict:
-    return {filter_by: bool(filter_value)}
+    if filter_by:
+        return {filter_by: bool(filter_value)}
+    else:
+        return {}

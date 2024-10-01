@@ -338,9 +338,9 @@ class ScrapeVacancies:
                     message.user_image_url = photos_.get(message.user_image_id)
                     all_messages_new.append(message)  # message.model_dump()
 
-        # unique_count = len(set([m.msg_url for m in all_messages_new]))
-        # logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-        #                f'Unique HRs {len(hrs)}. Errors: {len(errors)}')
+        unique_count = len(set([m.msg_url for m in all_messages_new]))
+        logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
+                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}')
 
         # all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())
@@ -370,7 +370,6 @@ class ImageDownloader:
         #     data.add_field('reqtype', 'fileupload')
         #     data.add_field('userhash', '')
         #     data.add_field('fileToUpload', f_bytes, filename='img.jpg', content_type='image/jpeg')
-        #
         #     resp = await session.post(url, data=data)
         #     response = await resp.text()
         #     return response
