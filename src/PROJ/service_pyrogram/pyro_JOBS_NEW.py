@@ -17,9 +17,6 @@ from pyrogram.types import Message
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import TG_SESSION_STRING
 
-# import uvloop
-# uvloop.install()
-
 # logging.basicConfig(
 #     level="INFO",
 #     format="%(message)s",
@@ -308,7 +305,7 @@ class ScrapeVacancies:
             # upd: separate load user photos
 
             images_ids = set([message.user_image_id for message in chat_results_flat])
-            photos_ = await ImageDownloader().upload(images_ids, client)
+            photos_ = await ImageUploader().upload(images_ids, client)
 
         # not separated by chats
         all_messages_new: List[VacancyData] = []
@@ -348,7 +345,7 @@ class ScrapeVacancies:
         return dict(all_messages=all_messages_new, hr_data=hr_data)
 
 
-class ImageDownloader:
+class ImageUploader:
 
     async def _upload_to_tgraph(self, f_bytes):
         async with ClientSession() as session:

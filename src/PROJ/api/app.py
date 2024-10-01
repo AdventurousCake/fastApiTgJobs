@@ -127,7 +127,6 @@ session_async = async_session_factory
 
 origins: list[AnyHttpUrl] = [
     "http://localhost:8000",
-    # "http://myfastapi7.ddns.net",
     "https://myfastapi7.ddns.net",
 ]
 

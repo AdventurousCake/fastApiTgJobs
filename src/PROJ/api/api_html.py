@@ -10,7 +10,7 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
-from src.PROJ.core.dependencies import limit_offset2
+from src.PROJ.core.dependencies import limit_offset
 from src.PROJ.db.db_repository_jobs import JobsDataRepository
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -28,7 +28,7 @@ async def read_item(request: Request, abc: str):
 # @app.get("/jobs")
 # @r_jobs.get("/page")
 @html_router.get('/html/')
-async def jobs_html(request: Request, paginator_params=Depends(limit_offset2)):
+async def jobs_html(request: Request, paginator_params=Depends(limit_offset)):
     """js table"""
 
     data = await JobsDataRepository.get_all(**paginator_params)
