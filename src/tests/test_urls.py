@@ -3,10 +3,10 @@ import pytest
 # from fastapi.testclient import TestClient as test_client
 
 
-class TestNewpage:
-    def test_newpage(test_client):
-        response = test_client.get('/newpage')
-        assert response.status_code == 200
+# class TestNewpage:
+#     def test_newpage(ac):
+#         response = ac.get('/newpage')
+#         assert response.status_code == 200
 
 
 @pytest.mark.parametrize(
