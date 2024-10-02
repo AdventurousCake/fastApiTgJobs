@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
-from src.PROJ.api.gen_test_data import init_fake_data
 from src.PROJ.core.config import TEST_DB_URL
 from src.tests._conftest import Base
 from src.PROJ.api.app import app
