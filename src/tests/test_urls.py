@@ -1,8 +1,5 @@
 import pytest
 
-from src.PROJ.api.gen_test_data import init_fake_data
-
-
 # from fastapi.testclient import TestClient as test_client
 
 
@@ -25,7 +22,7 @@ class TestNewpage:
     # indirect=True
 )
 async def test_urls(ac, url):
-    await init_fake_data(limit=10)
+    # await init_fake_data(limit=10)
 
     response = await ac.get(url)
     assert response.status_code == 200
