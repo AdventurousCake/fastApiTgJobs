@@ -5,15 +5,35 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.pool import NullPool
 
 from src.PROJ.core.config import TEST_DB_URL
-from src.tests._conftest import Base
 from src.PROJ.api.app import app
 
 # DATABASE
 # DATABASE_URL_TEST = f"postgresql+asyncpg://{DB_USER_TEST}:{DB_PASS_TEST}@{DB_HOST_TEST}:{DB_PORT_TEST}/{DB_NAME_TEST}"
+
+class Base(DeclarativeBase):
+    __abstract__ = True
+
+    # type_annotation_map = {str_256: String(256)}
+
+    repr_col_num = 3
+    repr_cols = tuple()
+
+    def __repr__(self):
+        cols = []
+        for idx, col in enumerate(self.__dict__):
+            if idx < self.repr_col_num:
+                cols.append(f"{col}={self.__dict__[col]}")
+            else:
+                break
+        return f"<{self.__class__.__name__}({', '.join(cols)})>"
+
+    def to_dict(self):
+        return {field.name: getattr(self, field.name) for field in self.__table__.c}
+
 
 engine_test = create_async_engine(TEST_DB_URL, poolclass=NullPool)
 async_session_maker = sessionmaker(engine_test, class_=AsyncSession, expire_on_commit=False)
