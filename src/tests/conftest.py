@@ -1,4 +1,5 @@
 import asyncio
+from math import e
 from typing import AsyncGenerator
 
 import pytest
@@ -10,29 +11,10 @@ from sqlalchemy.pool import NullPool
 
 from src.PROJ.core.config import TEST_DB_URL
 from src.PROJ.api.app import app
+from src.PROJ.core.db import Base
 
 # DATABASE
 # DATABASE_URL_TEST = f"postgresql+asyncpg://{DB_USER_TEST}:{DB_PASS_TEST}@{DB_HOST_TEST}:{DB_PORT_TEST}/{DB_NAME_TEST}"
-
-class Base(DeclarativeBase):
-    __abstract__ = True
-
-    # type_annotation_map = {str_256: String(256)}
-
-    repr_col_num = 3
-    repr_cols = tuple()
-
-    def __repr__(self):
-        cols = []
-        for idx, col in enumerate(self.__dict__):
-            if idx < self.repr_col_num:
-                cols.append(f"{col}={self.__dict__[col]}")
-            else:
-                break
-        return f"<{self.__class__.__name__}({', '.join(cols)})>"
-
-    def to_dict(self):
-        return {field.name: getattr(self, field.name) for field in self.__table__.c}
 
 
 engine_test = create_async_engine(TEST_DB_URL, poolclass=NullPool)
@@ -43,6 +25,7 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 app.dependency_overrides['async_session_factory'] = override_get_async_session
+app.dependency_overrides['engine_async'] = engine_test
 
 @pytest.fixture(autouse=True, scope='session')
 async def prepare_database():
