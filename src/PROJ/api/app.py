@@ -98,7 +98,6 @@ async def custom_swagger_ui_html():
         # swagger_js_url="https://fastly.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js", # unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js
         swagger_js_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js",
         swagger_css_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css",
-
         # swagger_ui_parameters={"customJs": "/static/swagger.js",}
         # swagger_favicon_url="/static/favicon.png"
     )
@@ -153,9 +152,9 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # app.include_router(main_router)
-app.include_router(html_router)
 app.include_router(r_private)
 app.include_router(r_jobs)
+app.include_router(html_router)
 # app.include_router(r_jwt)
 
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])

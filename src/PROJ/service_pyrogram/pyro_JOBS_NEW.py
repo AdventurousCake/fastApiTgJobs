@@ -13,7 +13,6 @@ from pydantic import ValidationError
 from pyrogram import Client
 from pyrogram.types import Message
 
-# from src.PROJ.service_pyrogram.pyro_config_OLD import api_id, api_hash, phone_number, password, SESSION_STRING
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import TG_SESSION_STRING
 
@@ -26,9 +25,6 @@ from src.PROJ.core.config import TG_SESSION_STRING
 # logger = logging.getLogger("rich")
 
 
-# logging.basicConfig(
-#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-# )
 logger = logging.getLogger(__name__)
 
 MSG_LIMIT = 500
@@ -57,11 +53,13 @@ class VacancyFilter:
     # bool(VACANCY_PATTERN.search(text))
 
     # TUPLES ONLY
-    SENIOR_KEYS = ("#lead", "senior", "#teamlead ", "team lead", "#techlead", "#qa")
+    SENIOR_KEYS = ("#lead", "senior", "#teamlead ",
+                   "team lead", "#techlead", "#qa")
     SENIOR_KEYS_EXCLUDE = ("middle", "junior")
     REMOTE_KEYS = ("#удаленка", "#remote", "#удаленно")
     STARTUP_KEYS = ("стартап",)
-    BIGTECH_RU_KEYS = ("yandex", "sber", 'яндекс', 'сбер', 'team.vk', 'kaspersky')
+    BIGTECH_RU_KEYS = ("yandex", "sber", 'яндекс',
+                       'сбер', 'team.vk', 'kaspersky')
 
     ONLY_VACANCIES_CHANNELS = ("job_python", "python_djangojobs", "p_rabota")
     OFFICE_KEYS = ("#офис",)
@@ -138,7 +136,7 @@ class MessageParser:
         )
         user_tg_id = message.from_user.id if message.from_user else None
         user_image_id = message.from_user.photo.small_file_id if (
-                message.from_user and message.from_user.photo) else None
+            message.from_user and message.from_user.photo) else None
 
         button_url = self.extract_button_url(message)
         chat_id = message.chat.id
@@ -146,7 +144,8 @@ class MessageParser:
         # tags = self.extract_tags(text_low)
         # print(tags)
 
-        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
+        text_cleaned = re.sub(
+            pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
         text_cleaned = text_cleaned.lstrip()
 
         try:
@@ -204,11 +203,13 @@ class DataSaver:
             logging.error("Nothing to save")
             return None
 
-        filename = f'data1_jobs_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv'
+        filename = f'data1_jobs_{
+            datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv'
         header = VacancyData.model_fields.keys()
 
         with open(filename, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
+            writer = csv.DictWriter(
+                f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
             writer.writeheader()
             for row in data:
                 writer.writerow(row.model_dump())
@@ -224,7 +225,8 @@ class TelegramClient:
             self.client = Client(":memory:", session_string=session_string)
 
         else:
-            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
+            self.client = Client(session_name, api_id, api_hash,
+                                 phone_number=phone_number, password=password)
 
     async def __aenter__(self):
         await self.client.start()
@@ -238,7 +240,8 @@ class TelegramClient:
         print(f"{current * 100 / total:.1f}%")
 
     async def file_id_to_bytes(self, file_id):
-        file = await self.client.download_media(file_id, in_memory=True, block=True)  # progress=self.progress
+        # progress=self.progress
+        file = await self.client.download_media(file_id, in_memory=True, block=True)
         file_bytes = bytes(file.getbuffer())
         file_name = file.name
         return file_bytes
@@ -246,7 +249,8 @@ class TelegramClient:
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
         chat_data = await self.client.get_chat(chat_id)
-        logger.info(f"Processing chat: {chat_data.title} - @{chat_data.username}")
+        logger.info(f"Processing chat: {
+                    chat_data.title} - @{chat_data.username}")
 
         messages = []
         async for message in self.client.get_chat_history(chat_id, limit=msg_limit):
@@ -263,17 +267,21 @@ class TelegramClient:
 
 
 class ScrapeVacancies:
-    def __init__(self, target_chats=None):
-        if target_chats is None:
+    def __init__(self, target_chats=None, test_mode=False):
+        if target_chats is None and not test_mode:
             target_chats = [
                 -1001328702818,
                 -1001049086457,
-                # -1001154585596,
-                # -1001292405242,
-                # -1001650380394,
-                # -1001850397538,
-                # -1001164103043,  # new
+                -1001154585596,
+                -1001292405242,
+                -1001650380394,
+                -1001850397538,
+                -1001164103043,  # new
             ]
+
+        elif test_mode:
+            target_chats = [-1001328702818,
+                            -1001049086457,]
         self.target_chats = target_chats
 
     # @classmethod
@@ -281,16 +289,17 @@ class ScrapeVacancies:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 
         logger.warning(f"Starting job search.\n"
-                       f"Session name: {SESSION_NAME}; {TASK_EXECUTION_TIME_LIMIT=}s;\n"
-                       f"{MSG_LIMIT=}; MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}\n"
+                       f"Session name: {SESSION_NAME}; {
+                           TASK_EXECUTION_TIME_LIMIT=}s;\n"
+                       f"{MSG_LIMIT=}; MSG MIN DATE: {
+                           MSG_MIN_DATE.strftime('%Y-%m-%d')}\n"
                        f"======================================\n"
                        f"Pass seniors(temporary): {PASS_SENIORS_TMP}\n"
-                       f"Target chats (({len(self.target_chats)})): {self.target_chats}\n"
+                       f"Target chats (({len(self.target_chats)})): {
+                           self.target_chats}\n"
                        f"======================================")
 
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
-            # async with TelegramClient(SESSION_NAME, api_id, api_hash, phone_number, password) as client:
-
             c_data = await client.client.get_me()
             logger.warning(f"Bot id: {c_data.id}; Name: {c_data.first_name}")
 
@@ -298,13 +307,15 @@ class ScrapeVacancies:
             tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),
                                       timeout=TASK_EXECUTION_TIME_LIMIT)
                      for chat_id in self.target_chats]
+
             # await выполнения функций, return:list of results [[VacancyData, ...]]
             chat_results: List[List[VacancyData] | Exception] = await asyncio.gather(*tasks, return_exceptions=True)
 
             chat_results_flat = list(itertools.chain(*chat_results))
             # upd: separate load user photos
 
-            images_ids = set([message.user_image_id for message in chat_results_flat])
+            images_ids = set(
+                [message.user_image_id for message in chat_results_flat])
             photos_ = await ImageUploader().upload(images_ids, client)
 
         # not separated by chats
@@ -317,9 +328,11 @@ class ScrapeVacancies:
             logger.info(f"Chat {self.target_chats[idx]}: {len(result)}")
             if isinstance(result, Exception):
                 if isinstance(result, asyncio.CancelledError):
-                    logger.error(f"asyncio.CancelledError in TASK get_chat_data", exc_info=result)
+                    logger.error(
+                        f"asyncio.CancelledError in TASK get_chat_data", exc_info=result)
                 elif isinstance(result, asyncio.TimeoutError):
-                    logger.error(f"asyncio.TimeoutError in TASK get_chat_data", exc_info=result)
+                    logger.error(
+                        f"asyncio.TimeoutError in TASK get_chat_data", exc_info=result)
                 else:
                     logger.error(f"Error in get_chat_data", exc_info=result)
                 errors.append(result)
@@ -361,16 +374,6 @@ class ImageUploader:
 
     async def _upload_to_catbox(self, f_bytes):
         url = 'https://catbox.moe/user/api.php'
-
-        # async with ClientSession() as session:
-        #     data = FormData()
-        #     data.add_field('reqtype', 'fileupload')
-        #     data.add_field('userhash', '')
-        #     data.add_field('fileToUpload', f_bytes, filename='img.jpg', content_type='image/jpeg')
-        #     resp = await session.post(url, data=data)
-        #     response = await resp.text()
-        #     return response
-
         async with httpx.AsyncClient() as client:
             files = {
                 'fileToUpload': ('img.jpg', f_bytes, 'image/jpeg')
@@ -410,7 +413,8 @@ class ImageUploader:
                 continue
 
             try:
-                file = await client.client.download_media(file_id, in_memory=True)  # block=False breaks program
+                # block=False breaks program
+                file = await client.client.download_media(file_id, in_memory=True)
                 file_bytes = bytes(file.getbuffer())
                 img_url = await self.uploader(file_bytes)
                 files_dict.update({file_id: img_url})
