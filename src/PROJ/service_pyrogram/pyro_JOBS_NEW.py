@@ -203,8 +203,8 @@ class DataSaver:
             logging.error("Nothing to save")
             return None
 
-        filename = f'data1_jobs_{
-            datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv'
+        filename = f"""data1_jobs_{
+            datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv"""
         header = VacancyData.model_fields.keys()
 
         with open(filename, "w", encoding="utf-8", newline="") as f:

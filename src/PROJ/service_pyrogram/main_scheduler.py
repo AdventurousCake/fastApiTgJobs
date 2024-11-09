@@ -10,7 +10,7 @@ async def run():
     data_jobs = [m.model_dump() for m in data.get("all_messages")]
     data_hrs = data.get("hr_data")
 
-    await JobsDataRepository.clean_isnew()
+    await JobsDataRepository.clean_isnew_flag()
 
     await HrDataRepository.upsert(data_hrs)
     res = await JobsDataRepository.upsert_or_ignore(data_jobs)

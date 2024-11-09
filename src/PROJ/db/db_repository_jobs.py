@@ -160,7 +160,7 @@ class JobsDataRepository:
                 raise e
 
     @classmethod
-    async def clean_isnew(cls):
+    async def clean_isnew_flag(cls):
         async with async_session_factory() as session:
             # new_data = {"is_new": True}
             r = await session.execute(update(Jobs).where(Jobs.is_new == True)

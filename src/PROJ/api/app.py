@@ -14,7 +14,9 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from src.PROJ.api.api_html import html_router
+from src.PROJ.api.API_NEWPAGE_utils_later import main_router
+
+from src.PROJ.api.api_jobs_html import html_jobs_router
 from src.PROJ.api.api_main import r_jobs, r_private
 from src.PROJ.core.db import init_models, async_session_factory
 from src.PROJ.core.limiter import limiter
@@ -151,10 +153,12 @@ from slowapi import _rate_limit_exceeded_handler
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# app.include_router(main_router)
+# todo
+app.include_router(main_router)
+
 app.include_router(r_private)
 app.include_router(r_jobs)
-app.include_router(html_router)
+app.include_router(html_jobs_router)
 # app.include_router(r_jwt)
 
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
