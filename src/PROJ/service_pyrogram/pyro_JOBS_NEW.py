@@ -249,8 +249,7 @@ class TelegramClient:
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
         chat_data = await self.client.get_chat(chat_id)
-        logger.info(f"Processing chat: {
-                    chat_data.title} - @{chat_data.username}")
+        logger.info(f"""Processing chat: {chat_data.title} - @{chat_data.username}""")
 
         messages = []
         async for message in self.client.get_chat_history(chat_id, limit=msg_limit):
