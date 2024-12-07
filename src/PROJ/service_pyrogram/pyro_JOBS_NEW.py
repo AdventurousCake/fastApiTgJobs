@@ -32,6 +32,7 @@ MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
 SESSION_NAME = "my_account_MEGAFON"
 PASS_SENIORS_TMP = True
 TASK_EXECUTION_TIME_LIMIT = 60 * 5
+UNIQUE_FILTER=True
 
 
 class MsgFilter:
@@ -251,9 +252,11 @@ class TelegramClient:
         chat_data = await self.client.get_chat(chat_id)
         logger.info(f"""Processing chat: {chat_data.title} - @{chat_data.username}""")
 
-        messages = []
+        messages: List[VacancyData] = []
+        messages_set_text_255 = [] # for check unique
+        
         async for message in self.client.get_chat_history(chat_id, limit=msg_limit):
-            # pre filter
+            # pre filter + unique
             if message.date < MSG_MIN_DATE:
                 continue
 
@@ -261,6 +264,12 @@ class TelegramClient:
                 message, chat_data.username
             )
             if parsed_message:
+                # check unique
+                if UNIQUE_FILTER:
+                    if parsed_message.text_[:255] in messages_set_text_255:
+                        continue
+                    messages_set_text_255.append(parsed_message.text_[:255])
+                
                 messages.append(parsed_message)
         return messages
 
@@ -287,16 +296,18 @@ class ScrapeVacancies:
     async def run(self) -> dict:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 
-        logger.warning(f"Starting job search.\n"
-                       f"Session name: {SESSION_NAME}; {
-                           TASK_EXECUTION_TIME_LIMIT=}s;\n"
-                       f"{MSG_LIMIT=}; MSG MIN DATE: {
-                           MSG_MIN_DATE.strftime('%Y-%m-%d')}\n"
-                       f"======================================\n"
-                       f"Pass seniors(temporary): {PASS_SENIORS_TMP}\n"
-                       f"Target chats (({len(self.target_chats)})): {
-                           self.target_chats}\n"
-                       f"======================================")
+        logger.warning(
+            f"""Starting job search.
+            Session name: {SESSION_NAME}; 
+            TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;
+            {MSG_LIMIT=}; 
+            MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
+            {UNIQUE_FILTER=}
+            ======================================
+            Pass seniors (temporary): {PASS_SENIORS_TMP}
+            Target chats ({len(self.target_chats)}): {self.target_chats}
+            ======================================"""
+        )
 
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             c_data = await client.client.get_me()
@@ -350,8 +361,8 @@ class ScrapeVacancies:
         unique_count = len(set([m.msg_url for m in all_messages_new]))
         logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
                        f'Unique HRs {len(hrs)}. Errors: {len(errors)}')
-
-        # all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
+        # post proc
+        all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())
 
         return dict(all_messages=all_messages_new, hr_data=hr_data)
