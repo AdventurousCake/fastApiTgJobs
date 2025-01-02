@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from fastapi.templating import Jinja2Templates
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, BackgroundTasks
@@ -14,13 +15,13 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from src.PROJ.api.API_NEWPAGE_utils_later import main_router
-
 from src.PROJ.api.api_jobs_html import html_jobs_router
-from src.PROJ.api.api_main import r_jobs, r_private
+from src.PROJ.api.api_main import r_jobs
 from src.PROJ.core.db import init_models, async_session_factory
 from src.PROJ.core.limiter import limiter
 from src.PROJ.service_pyrogram.main_scheduler import run
+from src.PROJ.users.user_create_superuser import create_user
+from src.PROJ.users.user_routers import router_users
 
 logging.basicConfig(
     level="INFO",
@@ -64,6 +65,8 @@ async def on_startup():
     # log.warning("skip db init; USE ALEMBIC\n")
     await init_models(drop=True)
 
+    await create_user(email='admin@admin.com', username='admin', password='admin', is_superuser=True)
+
     log.warning('[bold red]starting scheduler[/]', extra={"markup": True})
 
     # init scheduler
@@ -82,7 +85,7 @@ async def on_shutdown():
 
 
 app = FastAPI(
-    title="⚙ My private app",
+    title="⚙ My app",
     debug=True,
     docs_url=None,  # rewrote to fix swagger ui js load
     redoc_url=None,
@@ -121,7 +124,7 @@ async def redoc_html():
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-# templates = Jinja2Templates(BASE_DIR / "templates")
+templates = Jinja2Templates(BASE_DIR / "templates")
 
 
 session = async_session_factory
@@ -153,10 +156,8 @@ from slowapi import _rate_limit_exceeded_handler
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# todo
-app.include_router(main_router)
-
-app.include_router(r_private)
+# ROUTERS
+app.include_router(router_users)
 app.include_router(r_jobs)
 app.include_router(html_jobs_router)
 # app.include_router(r_jwt)

@@ -44,6 +44,8 @@ TEST_DB_URL = os.getenv("TEST_DB_URL")
 JWT_KEY = os.getenv("JWT_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 
+FASTAPI_USERS_SECRET = os.getenv("FASTAPI_USERS_SECRET")
+
 
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 if TEST_DB_HOST:

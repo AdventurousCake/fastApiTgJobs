@@ -9,7 +9,6 @@ from sqlalchemy.orm import DeclarativeBase
 
 from src.PROJ.core import config
 
-
 str_256 = Annotated[str, 256]
 
 
@@ -33,6 +32,12 @@ class Base(DeclarativeBase):
     def to_dict(self):
         return {field.name: getattr(self, field.name) for field in self.__table__.c}
 
+# class PreBase:
+#     @declared_attr
+#     def __tablename__(cls):
+#         return cls.__name__.lower()
+#
+#     id = Column(Integer, primary_key=True)
 
 if config.MODE == "TEST":
     DATABASE_URL = config.TEST_DB_URL
@@ -49,6 +54,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 engine_async = create_async_engine(DATABASE_URL, echo=True, **DATABASE_PARAMS)
 async_session_factory = async_sessionmaker(engine_async, expire_on_commit=False)  # ASYNC WITH!
 
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_factory() as session:
+        yield session
 
 async def init_models(drop=False):
     async with engine_async.begin() as conn:
@@ -75,7 +83,6 @@ FORMAT = "%(message)s"
 logging.basicConfig(
     level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
 )
-
 log = logging.getLogger("rich")
 
 

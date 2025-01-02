@@ -89,7 +89,7 @@ class JobsDataRepository:
 
                 """
                 https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#specifying-the-target
-                constraint argument is used to specify an index directly rather than inferring it. 
+                constraint argument is used to specify an index directly rather than inferring it.
                 This can be the name of a UNIQUE constraint, a PRIMARY KEY constraint, or an INDEX:"""
 
                 # text_
@@ -136,7 +136,7 @@ class JobsDataRepository:
 
                 """
                 https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#specifying-the-target
-                constraint argument is used to specify an index directly rather than inferring it. 
+                constraint argument is used to specify an index directly rather than inferring it.
                 This can be the name of a UNIQUE constraint, a PRIMARY KEY constraint, or an INDEX:"""
 
                 # text_

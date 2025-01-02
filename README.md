@@ -12,7 +12,7 @@
 ## Пример использования
 1. Получить сессию pyrogram, сохранить в src/PROJ/service_pyrogram
 2. Заполнить env файл
-3. python3 src/PROJ/api/app.py
+3. uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
 
 ## URLs:
 

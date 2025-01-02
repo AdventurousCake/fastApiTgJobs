@@ -4,9 +4,8 @@ from typing import Optional, Any
 
 from pydantic import BaseModel, Field, computed_field, field_serializer, model_validator
 
-
 class VacancyData(BaseModel):
-    """v08.09"""
+    """v1012"""
 
     level: bool
     remote: bool
@@ -16,15 +15,15 @@ class VacancyData(BaseModel):
     text_: str
     contacts: str
     user_username: Optional[str] = Field(default=None)
-    user_tg_id: Optional[int]
-    user_image_id: Optional[str] = Field(default=None)
-    user_image_url: Optional[str] = Field(default=None)
     posted_at: datetime
     msg_url: str
     chat_username: str
     chat_id: int
     views: Optional[int]
     button_url: Optional[str] = Field(default=None)
+    user_tg_id: Optional[int]
+    user_image_id: Optional[str] = Field(default=None)
+    user_image_url: Optional[str] = Field(default=None)
 
     @field_serializer('posted_at', when_used='json')
     def serialize_date_ru(self, posted_at) -> str:
@@ -64,3 +63,12 @@ class SHr(BaseModel):
 
     def as_dict(self) -> dict[str, str | int]:
         return self.__dict__
+    
+
+class Search(BaseModel):
+    id: int
+    date: datetime
+    new_vacancies_count: int
+    vacancies: list[VacancyData]
+    
+    def new_vacancies_count(self) -> int: ...

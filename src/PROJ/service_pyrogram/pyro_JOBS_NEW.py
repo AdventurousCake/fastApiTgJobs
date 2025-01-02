@@ -304,7 +304,7 @@ class ScrapeVacancies:
             MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
             {UNIQUE_FILTER=}
             ======================================
-            Pass seniors (temporary): {PASS_SENIORS_TMP}
+            PASS seniors (temporary): {PASS_SENIORS_TMP}
             Target chats ({len(self.target_chats)}): {self.target_chats}
             ======================================"""
         )
