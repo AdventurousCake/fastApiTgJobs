@@ -12,8 +12,8 @@
 ## Пример использования
 1. Получить сессию pyrogram, сохранить в src/PROJ/service_pyrogram
 2. Заполнить env файл
-3. uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
-
+3. Запустить uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
+4. Открыть в браузере localost:9000
 ## URLs:
 
 ### /jobs/jobs_all

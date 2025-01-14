@@ -14,7 +14,7 @@ rich~=13.7.1
 pytest~=8.3.1
 pytest_asyncio
 slowapi~=0.1.9
-sqladmin[full]==0.18.0
+sqladmin[full]==0.20.1
 requests~=2.32.3
 apscheduler~=3.10.4
 fastapi-cache2

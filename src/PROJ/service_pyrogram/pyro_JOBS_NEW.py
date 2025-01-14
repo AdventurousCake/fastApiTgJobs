@@ -29,10 +29,9 @@ logger = logging.getLogger(__name__)
 
 MSG_LIMIT = 500
 MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
-SESSION_NAME = "my_account_MEGAFON"
 PASS_SENIORS_TMP = True
 TASK_EXECUTION_TIME_LIMIT = 60 * 5
-UNIQUE_FILTER=True
+UNIQUE_FILTER = True
 
 
 class MsgFilter:
@@ -137,7 +136,7 @@ class MessageParser:
         )
         user_tg_id = message.from_user.id if message.from_user else None
         user_image_id = message.from_user.photo.small_file_id if (
-            message.from_user and message.from_user.photo) else None
+                message.from_user and message.from_user.photo) else None
 
         button_url = self.extract_button_url(message)
         chat_id = message.chat.id
@@ -205,7 +204,7 @@ class DataSaver:
             return None
 
         filename = f"""data1_jobs_{
-            datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv"""
+        datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv"""
         header = VacancyData.model_fields.keys()
 
         with open(filename, "w", encoding="utf-8", newline="") as f:
@@ -253,8 +252,8 @@ class TelegramClient:
         logger.info(f"""Processing chat: {chat_data.title} - @{chat_data.username}""")
 
         messages: List[VacancyData] = []
-        messages_set_text_255 = [] # for check unique
-        
+        messages_set_text_255 = []  # for check unique
+
         async for message in self.client.get_chat_history(chat_id, limit=msg_limit):
             # pre filter + unique
             if message.date < MSG_MIN_DATE:
@@ -269,7 +268,7 @@ class TelegramClient:
                     if parsed_message.text_[:255] in messages_set_text_255:
                         continue
                     messages_set_text_255.append(parsed_message.text_[:255])
-                
+
                 messages.append(parsed_message)
         return messages
 
@@ -289,7 +288,7 @@ class ScrapeVacancies:
 
         elif test_mode:
             target_chats = [-1001328702818,
-                            -1001049086457,]
+                            -1001049086457, ]
         self.target_chats = target_chats
 
     # @classmethod
@@ -298,7 +297,7 @@ class ScrapeVacancies:
 
         logger.warning(
             f"""Starting job search.
-            Session name: {SESSION_NAME}; 
+            USING ENV KEY TG SESSION
             TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;
             {MSG_LIMIT=}; 
             MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
@@ -324,8 +323,7 @@ class ScrapeVacancies:
             chat_results_flat = list(itertools.chain(*chat_results))
             # upd: separate load user photos
 
-            images_ids = set(
-                [message.user_image_id for message in chat_results_flat])
+            images_ids = set([message.user_image_id for message in chat_results_flat])
             photos_ = await ImageUploader().upload(images_ids, client)
 
         # not separated by chats

@@ -1,5 +1,4 @@
 import asyncio
-from math import e
 from typing import AsyncGenerator
 
 import pytest

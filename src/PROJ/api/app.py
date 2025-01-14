@@ -1,3 +1,4 @@
+from slowapi import _rate_limit_exceeded_handler
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,9 +16,10 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
+from src.PROJ.core import config
 from src.PROJ.api.api_jobs_html import html_jobs_router
 from src.PROJ.api.api_main import r_jobs
-from src.PROJ.core.db import init_models, async_session_factory
+from src.PROJ.core.db import init_models, async_session_factory, engine_async
 from src.PROJ.core.limiter import limiter
 from src.PROJ.service_pyrogram.main_scheduler import run
 from src.PROJ.users.user_create_superuser import create_user
@@ -28,17 +30,17 @@ logging.basicConfig(
     format="%(message)s",
     datefmt="[%X]",
     handlers=[RichHandler(rich_tracebacks=True)],  # markup=True
-    # handlers=[RichHandler(rich_tracebacks=True, console=console)],
 )
 # FORMAT = "%(message)s"
 # logging.basicConfig(
-#     level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler(markup=True)]  # RichHandler()
-# )
-
+#     level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler(markup=True)]  # RichHandler())
 # init_logging()
+
 log = logging.getLogger("rich")
 
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+
+
 def schedule_jobs():
     logging.warning('add tasks for scheduler ONLY first_run')
     # scheduler.add_job(run, id="first_run")  # first run
@@ -62,7 +64,7 @@ async def run_bg_tasks(background_tasks: BackgroundTasks):
 
 
 async def on_startup():
-    # log.warning("skip db init; USE ALEMBIC\n")
+    # log.warning("skip db init; ALEMBIC\n")
     await init_models(drop=True)
 
     await create_user(email='admin@admin.com', username='admin', password='admin', is_superuser=True)
@@ -93,18 +95,15 @@ app = FastAPI(
 )
 
 
-# fix for static load issues
+# # fix for static load issues
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
         openapi_url=app.openapi_url,
         title=app.title + " - Swagger UI",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-        # swagger_js_url="https://fastly.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js", # unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js
         swagger_js_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js",
         swagger_css_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css",
-        # swagger_ui_parameters={"customJs": "/static/swagger.js",}
-        # swagger_favicon_url="/static/favicon.png"
     )
 
 
@@ -115,17 +114,13 @@ async def swagger_ui_redirect():
 
 @app.get("/redoc", include_in_schema=False)
 async def redoc_html():
-    return get_redoc_html(
-        openapi_url=app.openapi_url,
-        title=app.title + " - ReDoc",
-        redoc_js_url="https://unpkg.com/redoc@next/bundles/redoc.standalone.js",
-    )
+    return get_redoc_html(openapi_url=app.openapi_url, title=app.title + " - ReDoc",
+                          redoc_js_url="https://unpkg.com/redoc@next/bundles/redoc.standalone.js", )
 
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(BASE_DIR / "templates")
-
 
 session = async_session_factory
 session_async = async_session_factory
@@ -151,8 +146,6 @@ app.add_middleware(
 )
 
 # LIMIT
-from slowapi import _rate_limit_exceeded_handler
-
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -165,8 +158,19 @@ app.include_router(html_jobs_router)
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
 
 
+# admin panel
+if config.ADMIN_PANEL_ENABLED:
+    from src.PROJ.admin_panel.admin_views import UserAdmin, JobsAdmin
+    from sqladmin import Admin
+
+    admin = Admin(app, engine_async)
+    admin.add_view(UserAdmin)
+    admin.add_view(JobsAdmin)
+
+
 def api_run():
     uvicorn.run(app, host="localhost", port=8000, log_level="debug")  # log_level="info" # host="0.0.0.0", port=80
+
 
 if __name__ == "__main__":
     api_run()

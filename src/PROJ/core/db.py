@@ -36,7 +36,6 @@ class Base(DeclarativeBase):
 #     @declared_attr
 #     def __tablename__(cls):
 #         return cls.__name__.lower()
-#
 #     id = Column(Integer, primary_key=True)
 
 if config.MODE == "TEST":
@@ -47,7 +46,7 @@ else:
     DATABASE_URL = config.DB_URL
     DATABASE_PARAMS = {}
 
-logging.warning(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nMODE: {config.MODE}\n{DATABASE_URL}\n\n")
+logging.warning(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nMODE: {config.MODE}\n{DATABASE_URL}\n\n")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

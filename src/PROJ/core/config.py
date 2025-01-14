@@ -17,7 +17,7 @@ env_file = find_dotenv(".env")
 env = load_dotenv(env_file)
 if not env:
     logging.critical("!!! no .env file")
-    
+
 MODE = os.getenv("MODE")
 if MODE == "DOCKER":
     DB_HOST = os.getenv("DB_HOST", "pg")
@@ -41,16 +41,17 @@ TEST_DB_USER = os.getenv("TEST_DB_USER")
 TEST_DB_PASS = os.getenv("TEST_DB_PASS")
 TEST_DB_URL = os.getenv("TEST_DB_URL")
 
+# JWT
 JWT_KEY = os.getenv("JWT_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 
 FASTAPI_USERS_SECRET = os.getenv("FASTAPI_USERS_SECRET")
 
-
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 if TEST_DB_HOST:
     TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
 
+ADMIN_PANEL_ENABLED = os.getenv("ADMIN_PANEL_ENABLED")
 
 # pyro
 TG_SESSION_STRING = os.getenv("TG_SESSION_STRING")
@@ -58,4 +59,3 @@ TG_SESSION_STRING = os.getenv("TG_SESSION_STRING")
 if __name__ == "__main__":
     print(env_file)
     print(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
-
