@@ -1,10 +1,10 @@
-fastapi[all]==0.111
+fastapi[all]==0.115
 fastapi-users[sqlalchemy]
 uvicorn[standard]~=0.30.3
 alembic~=1.13.2
 asyncpg~=0.29.0
 sqlalchemy~=2.0.31
-#psycopg[binary]
+psycopg2-binary
 aiofiles
 aiohttp
 jinja2
