@@ -17,7 +17,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from src.PROJ.core import config
-from src.PROJ.api.api_jobs_html import html_jobs_router
+# from src.PROJ.api.api_jobs_html import html_jobs_router
 from src.PROJ.api.api_main import r_jobs
 from src.PROJ.core.db import init_models, async_session_factory, engine_async
 from src.PROJ.core.limiter import limiter
@@ -153,7 +153,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # ROUTERS
 app.include_router(router_users)
 app.include_router(r_jobs)
-app.include_router(html_jobs_router)
+# app.include_router(html_jobs_router)
 # app.include_router(r_jwt)
 
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
