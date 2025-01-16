@@ -67,6 +67,7 @@ async def on_startup():
     # log.warning("skip db init; ALEMBIC\n")
     await init_models(drop=True)
 
+    log.warning('[bold red]create superuser admin@admin.com[/]', extra={"markup": True})
     await create_user(email='admin@admin.com', username='admin', password='admin', is_superuser=True)
 
     log.warning('[bold red]starting scheduler[/]', extra={"markup": True})

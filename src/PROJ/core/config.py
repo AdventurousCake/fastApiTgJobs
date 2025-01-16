@@ -39,17 +39,18 @@ TEST_DB_PORT = os.getenv("TEST_DB_PORT")
 TEST_DB_NAME = os.getenv("TEST_DB_NAME")
 TEST_DB_USER = os.getenv("TEST_DB_USER")
 TEST_DB_PASS = os.getenv("TEST_DB_PASS")
-TEST_DB_URL = os.getenv("TEST_DB_URL")
+TEST_DB_URL = os.getenv("TEST_DB_URL")  # or full
+
+DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+if TEST_DB_HOST:
+    TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
+
 
 # JWT
 JWT_KEY = os.getenv("JWT_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 
 FASTAPI_USERS_SECRET = os.getenv("FASTAPI_USERS_SECRET")
-
-DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-if TEST_DB_HOST:
-    TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
 
 ADMIN_PANEL_ENABLED = os.getenv("ADMIN_PANEL_ENABLED")
 

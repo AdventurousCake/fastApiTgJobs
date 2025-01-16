@@ -401,8 +401,8 @@ class ImageUploader:
             raise ValueError("File is empty")
 
         try:
-            # return await self._upload_to_tgraph(f_bytes)
-            return await self._upload_to_catbox(f_bytes)
+            return await self._upload_to_tgraph(f_bytes)
+            # return await self._upload_to_catbox(f_bytes)
         except Exception as e:
             logging.error(msg=f'Error in upload img: {e}', exc_info=True)
             return 'err_upl'
