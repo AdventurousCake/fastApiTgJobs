@@ -18,7 +18,7 @@ from starlette.staticfiles import StaticFiles
 
 from src.PROJ.core import config
 # from src.PROJ.api.api_jobs_html import html_jobs_router
-from src.PROJ.api.api_main import r_jobs
+from src.PROJ.api.routers_jobs import r_jobs
 from src.PROJ.core.db import init_models, async_session_factory, engine_async
 from src.PROJ.core.limiter import limiter
 from src.PROJ.service_pyrogram.main_scheduler import run
@@ -31,9 +31,7 @@ logging.basicConfig(
     datefmt="[%X]",
     handlers=[RichHandler(rich_tracebacks=True)],  # markup=True
 )
-# FORMAT = "%(message)s"
-# logging.basicConfig(
-#     level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler(markup=True)]  # RichHandler())
+# logging.basicConfig(level="NOTSET",format="%(message)s",datefmt="[%X]",handlers=[RichHandler(markup=True)]#Handler())
 # init_logging()
 
 log = logging.getLogger("rich")
@@ -50,7 +48,7 @@ def schedule_jobs():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # start app
+    # Start app
     await on_startup()
     yield
 
@@ -77,9 +75,10 @@ async def on_startup():
     scheduler.start()
 
     # init cache
+    log.warning('[bold red]starting redis+cache[/]', extra={"markup": True})
     # redis = aioredis.from_url("redis://localhost")
     # redis = aioredis.from_url("redis://localhost", encoding="utf8", decode_responses=True)
-    # FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    # FastAPICache.init(RedisBackend(redis), prefix="fa-cache")
     FastAPICache.init(InMemoryBackend())
 
 
@@ -104,8 +103,7 @@ async def custom_swagger_ui_html():
         title=app.title + " - Swagger UI",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
         swagger_js_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js",
-        swagger_css_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css",
-    )
+        swagger_css_url="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css",)
 
 
 @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
@@ -153,7 +151,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # ROUTERS
 app.include_router(router_users)
 app.include_router(r_jobs)
-# app.include_router(html_jobs_router)
 # app.include_router(r_jwt)
 
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
@@ -170,7 +167,7 @@ if config.ADMIN_PANEL_ENABLED:
 
 
 def api_run():
-    uvicorn.run(app, host="localhost", port=8000, log_level="debug")  # log_level="info" # host="0.0.0.0", port=80
+    uvicorn.run(app, host="localhost", port=8000, log_level="debug")
 
 
 if __name__ == "__main__":

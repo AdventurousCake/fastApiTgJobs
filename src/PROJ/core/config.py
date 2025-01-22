@@ -44,7 +44,9 @@ TEST_DB_URL = os.getenv("TEST_DB_URL")  # or full
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 if TEST_DB_HOST:
     TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
-
+else:
+    # Using env
+    assert "+asyncpg" in TEST_DB_URL
 
 # JWT
 JWT_KEY = os.getenv("JWT_KEY")

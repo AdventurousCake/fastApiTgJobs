@@ -1,9 +1,7 @@
 import logging
-import pathlib
 
 from fastapi import Query, Depends, APIRouter
 from fastapi_cache.decorator import cache
-from starlette.requests import Request
 
 from src.PROJ.api.schemas_jobs import SHr, VacancyData
 from src.PROJ.core.dependencies import filter_params
@@ -24,7 +22,8 @@ r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 
 @cache(expire=60)
 @r_jobs.get("/jobs_all", response_model=list[VacancyData])
-async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)):
+async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0),
+                   ordering: str = Query(None)):
     data = await JobsDataRepository.get_all(limit=limit, offset=offset)
     return data
 
