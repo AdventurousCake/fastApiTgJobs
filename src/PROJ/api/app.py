@@ -5,8 +5,7 @@ from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
 import uvicorn
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_oauth2_redirect_html, get_redoc_html, get_swagger_ui_html
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
@@ -16,34 +15,22 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
+from src.PROJ.api.scheduler import schedule_jobs, scheduler
 from src.PROJ.core import config
-# from src.PROJ.api.api_jobs_html import html_jobs_router
 from src.PROJ.api.routers_jobs import r_jobs
 from src.PROJ.core.db import init_models, async_session_factory, engine_async
 from src.PROJ.core.limiter import limiter
-from src.PROJ.service_pyrogram.main_scheduler import run
 from src.PROJ.users.user_create_superuser import create_user
 from src.PROJ.users.user_routers import router_users
 
 logging.basicConfig(
     level="INFO",
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)],  # markup=True
+    format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)],  # markup=True
 )
 # logging.basicConfig(level="NOTSET",format="%(message)s",datefmt="[%X]",handlers=[RichHandler(markup=True)]#Handler())
 # init_logging()
 
 log = logging.getLogger("rich")
-
-scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-
-
-def schedule_jobs():
-    logging.warning('add tasks for scheduler ONLY first_run')
-    # scheduler.add_job(run, id="first_run")  # first run
-    # scheduler.add_job(run, "interval", seconds=3600, id="my_job_id")
-    scheduler.add_job(run, "cron", day_of_week="mon-sun", hour="7-20", minute="0,30", id="parse_daily")
 
 
 @asynccontextmanager
@@ -54,11 +41,6 @@ async def lifespan(app: FastAPI):
 
     # Close app
     await on_shutdown()
-
-
-async def run_bg_tasks(background_tasks: BackgroundTasks):
-    # background_tasks.add_task(write_log, message)
-    pass
 
 
 async def on_startup():
