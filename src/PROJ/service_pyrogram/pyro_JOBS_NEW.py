@@ -1,20 +1,17 @@
 import asyncio
-import csv
 import itertools
 import logging
 import re
-from datetime import datetime, timedelta, UTC
-from pprint import pprint
+from datetime import datetime, timedelta
 from typing import Optional, List
 
-import httpx
-from aiohttp import ClientSession, FormData
 from pydantic import ValidationError
 from pyrogram import Client
 from pyrogram.types import Message
 
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import TG_SESSION_STRING
+from src.PROJ.core.utils import ImageUploader
 
 # logging.basicConfig(
 #     level="INFO",
@@ -196,27 +193,6 @@ class MessageParser:
         return [tag.strip() for tag in re.findall(pattern, text)]
 
 
-class DataSaver:
-    @staticmethod
-    async def save_to_csv(data: List[VacancyData]):
-        if len(data) == 0:
-            logging.error("Nothing to save")
-            return None
-
-        filename = f"""data1_jobs_{
-            datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv"""
-        header = VacancyData.model_fields.keys()
-
-        with open(filename, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(
-                f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
-            writer.writeheader()
-            for row in data:
-                writer.writerow(row.model_dump())
-
-        logger.info(f"Done, CSV saved {len(data)} rows. File: {filename}")
-
-
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
                  password: str = None, session_string: str = None):
@@ -365,74 +341,6 @@ class ScrapeVacancies:
         return dict(all_messages=all_messages_new, hr_data=hr_data)
 
 
-class ImageUploader:
-
-    async def _upload_to_tgraph(self, f_bytes):
-        async with ClientSession() as session:
-            url = 'https://telegra.ph/upload'
-
-            resp = await session.post(url, data={'file': f_bytes}, timeout=10)
-            response = await resp.json()
-
-            if str(response) == 'Unknown error':
-                logger.error('tg error: ' + response)
-            pprint(response)
-            return 'https://telegra.ph' + response[0]['src']
-
-    async def _upload_to_catbox(self, f_bytes):
-        url = 'https://catbox.moe/user/api.php'
-        async with httpx.AsyncClient() as client:
-            files = {
-                'fileToUpload': ('img.jpg', f_bytes, 'image/jpeg')
-            }
-
-            data = {
-                'reqtype': 'fileupload',
-                'userhash': ''
-            }
-
-            resp = await client.post(url, files=files, data=data, timeout=10)
-            response = resp.text
-            return response
-
-    async def uploader(self, f_bytes):
-        if not f_bytes:
-            raise ValueError("File is empty")
-
-        try:
-            return await self._upload_to_tgraph(f_bytes)
-            # return await self._upload_to_catbox(f_bytes)
-        except Exception as e:
-            logging.error(msg=f'Error in upload img: {e}', exc_info=True)
-            return 'err_upl'
-
-    @classmethod
-    async def download(cls, file_ids: list):
-        pass
-
-    # @classmethod
-    async def upload(self, file_ids: list, client: TelegramClient) -> dict:
-        files_dict = {}
-        # for file_id in file_ids:
-        while file_ids:
-            file_id = file_ids.pop()
-            if file_id is None:
-                continue
-
-            try:
-                # block=False breaks program
-                file = await client.client.download_media(file_id, in_memory=True)
-                file_bytes = bytes(file.getbuffer())
-                img_url = await self.uploader(file_bytes)
-                files_dict.update({file_id: img_url})
-
-            except ValueError:
-                logging.error(f"File not found (None): {file_id}")
-                continue
-
-        return files_dict
-
-
 if __name__ == "__main__":
     # start_time = asyncio.get_event_loop().time()
     # end_time = asyncio.get_event_loop().time()
@@ -442,4 +350,4 @@ if __name__ == "__main__":
     # from rich.traceback import install
     # install(show_locals=True)
 
-    asyncio.run(ScrapeVacancies().run())
+    asyncio.run(ScrapeVacancies(test_mode=True).run())
