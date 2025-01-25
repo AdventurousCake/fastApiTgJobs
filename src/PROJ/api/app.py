@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from src.PROJ.api.scheduler import schedule_jobs, scheduler
+from src.PROJ.core.scheduler import schedule_jobs, start_scheduler, stop_scheduler
 from src.PROJ.core import config
 from src.PROJ.api.routers_jobs import r_jobs
 from src.PROJ.core.db import init_models, async_session_factory, engine_async
@@ -54,7 +54,7 @@ async def on_startup():
 
     # init scheduler
     schedule_jobs()
-    scheduler.start()
+    start_scheduler()
 
     # init cache
     log.warning('[bold red]starting redis+cache[/]', extra={"markup": True})
@@ -65,7 +65,7 @@ async def on_startup():
 
 
 async def on_shutdown():
-    scheduler.shutdown()
+    stop_scheduler()
 
 
 app = FastAPI(

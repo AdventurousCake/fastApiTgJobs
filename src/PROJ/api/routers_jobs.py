@@ -14,12 +14,6 @@ log = logging.getLogger(__name__)
 
 r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 
-
-# @r_jobs.get('/')
-# async def get_filtered(request: Request, params=Depends(filter_params)):
-#     data = await JobsDataRepository.get_all(**params)
-#     return [m.to_dict() for m in data]
-
 @cache(expire=60)
 @r_jobs.get("/jobs_all", response_model=list[VacancyData])
 async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0),
@@ -33,5 +27,10 @@ async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)
 async def hrs_all(params=Depends(filter_params)):
     data = await HrDataRepository.get_all(**params)
     return data
+
+# @r_jobs.get('/')
+# async def get_filtered(request: Request, params=Depends(filter_params)):
+#     data = await JobsDataRepository.get_all(**params)
+#     return [m.to_dict() for m in data]
 
 # tst endpoints shelf

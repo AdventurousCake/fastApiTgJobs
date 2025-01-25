@@ -13,6 +13,9 @@ def schedule_jobs():
 
 def start_scheduler():
     scheduler.start()
+    
+def stop_scheduler():
+    scheduler.shutdown()
 
 # async def run_bg_tasks(background_tasks: BackgroundTasks):
 #     # background_tasks.add_task(write_log, message)

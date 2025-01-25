@@ -204,7 +204,7 @@ class DataSaver:
             return None
 
         filename = f"""data1_jobs_{
-        datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv"""
+            datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}_NEW.csv"""
         header = VacancyData.model_fields.keys()
 
         with open(filename, "w", encoding="utf-8", newline="") as f:
@@ -299,7 +299,7 @@ class ScrapeVacancies:
             f"""Starting job search.
             USING ENV KEY TG SESSION
             TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;
-            {MSG_LIMIT=}; 
+            {MSG_LIMIT=};
             MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
             {UNIQUE_FILTER=}
             ======================================
@@ -334,13 +334,12 @@ class ScrapeVacancies:
 
         for idx, result in enumerate(chat_results):
             logger.info(f"Chat {self.target_chats[idx]}: {len(result)}")
+
             if isinstance(result, Exception):
                 if isinstance(result, asyncio.CancelledError):
-                    logger.error(
-                        f"asyncio.CancelledError in TASK get_chat_data", exc_info=result)
+                    logger.error(f"asyncio.CancelledError in TASK get_chat_data", exc_info=result)
                 elif isinstance(result, asyncio.TimeoutError):
-                    logger.error(
-                        f"asyncio.TimeoutError in TASK get_chat_data", exc_info=result)
+                    logger.error(f"asyncio.TimeoutError in TASK get_chat_data", exc_info=result)
                 else:
                     logger.error(f"Error in get_chat_data", exc_info=result)
                 errors.append(result)
@@ -372,7 +371,7 @@ class ImageUploader:
         async with ClientSession() as session:
             url = 'https://telegra.ph/upload'
 
-            resp = await session.post(url, data={'file': f_bytes})
+            resp = await session.post(url, data={'file': f_bytes}, timeout=10)
             response = await resp.json()
 
             if str(response) == 'Unknown error':
