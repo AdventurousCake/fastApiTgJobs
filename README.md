@@ -14,8 +14,8 @@
 2. Заполнить env файл
 3. Запустить uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
 4. Открыть в браузере localost:9000
-## URLs:
 
+## URLs:
 ### /jobs/jobs_all
 Возвращает список вакансий
 

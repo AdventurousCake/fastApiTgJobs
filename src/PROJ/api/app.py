@@ -110,7 +110,6 @@ origins: list[AnyHttpUrl] = [
     "http://localhost:8000",
     "https://myfastapi7.ddns.net",
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -134,7 +133,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(router_users)
 app.include_router(r_jobs)
 # app.include_router(r_jwt)
-
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
 
 
