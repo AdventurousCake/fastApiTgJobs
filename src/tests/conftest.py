@@ -1,4 +1,5 @@
 import asyncio
+import random
 from typing import AsyncGenerator
 
 import pytest
@@ -11,6 +12,8 @@ from sqlalchemy.pool import NullPool
 from src.PROJ.core.config import TEST_DB_URL
 from src.PROJ.api.app import app
 from src.PROJ.core.db import Base
+from src.PROJ.users.user_models import User
+from src.tests.gen_test_data import init_fake_data
 
 # DATABASE
 # DATABASE_URL_TEST = f"postgresql+asyncpg://{DB_USER_TEST}:{DB_PASS_TEST}@{DB_HOST_TEST}:{DB_PORT_TEST}/{DB_NAME_TEST}"
@@ -26,18 +29,52 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
 app.dependency_overrides['async_session_factory'] = override_get_async_session
 app.dependency_overrides['engine_async'] = engine_test
 
+
+async def create_test_users(session: AsyncSession):
+    test_users = [
+        {
+            "email": "admin@test.com",
+            "username": "admin",
+            "password": "admin123",
+            "is_superuser": True,
+            "role_id": 1
+        },
+        {
+            "email": "user@test.com", 
+            "username": "testuser",
+            "password": "user123",
+            "is_superuser": False,
+            "role_id": 2
+        }
+    ]
+
+    for user_data in test_users:
+        user = User(
+            email=user_data["email"],
+            username=user_data["username"],
+            # hashed_password=get_password_hash(user_data["password"]),
+            hashed_password="EXAMPLE",
+            is_superuser=user_data["is_superuser"],
+            # role_id=user_data["role_id"]
+        )
+        session.add(user)
+    
+    await session.commit()
+
+
 @pytest.fixture(autouse=True, scope='session')
 async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+    async with async_session_maker() as session:
+        await create_test_users(session)
     # todo
     # await init_fake_data(limit=10)
 
     yield
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-
 
 # @pytest.fixture(scope='session')
 # async def generate_fake_data():
@@ -57,3 +94,18 @@ test_client = TestClient(app)
 async def ac() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac
+        
+        
+# test
+@pytest.fixture
+async def test_user_token(ac: AsyncClient) -> str:
+    response = await ac.post(
+        "/auth/login",
+        data={"username": "testuser", "password": "user123"}
+    )
+    return response.json()["access_token"]
+
+@pytest.fixture
+async def authorized_client(ac: AsyncClient, test_user_token: str) -> AsyncClient:
+    ac.headers["Authorization"] = f"Bearer {test_user_token}"
+    return ac
