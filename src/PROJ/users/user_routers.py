@@ -43,15 +43,15 @@ router_users.include_router(
     deprecated=True
 )
 def delete_user(id: str):
-    """Не используйте удаление, деактивируйте пользователей."""
+    """Deactivate users instead of delete"""
     raise HTTPException(
-        # 405 ошибка - метод не разрешен.
+        # 405 - method not allowed
         status_code=405,
         detail="Удаление пользователей запрещено!"
     )
 
 
-@router_users.get("/users_all", dependencies=[Depends(current_superuser)])
+@router_users.get("/users_all_su", dependencies=[Depends(current_superuser)])
 async def get_users_all():
     ...
 
