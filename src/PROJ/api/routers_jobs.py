@@ -4,6 +4,7 @@ from fastapi import Query, Depends, APIRouter
 from fastapi_cache.decorator import cache
 
 from src.PROJ.api.schemas_jobs import SHr, VacancyData
+from src.PROJ.core.db import async_session_factory
 from src.PROJ.core.dependencies import filter_params
 from src.PROJ.core.limiter import limiter
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository

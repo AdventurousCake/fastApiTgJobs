@@ -15,9 +15,6 @@ from src.PROJ.core.db import Base
 from src.PROJ.users.user_models import User
 from src.tests.gen_test_data import init_fake_data
 
-# DATABASE
-# DATABASE_URL_TEST = f"postgresql+asyncpg://{DB_USER_TEST}:{DB_PASS_TEST}@{DB_HOST_TEST}:{DB_PORT_TEST}/{DB_NAME_TEST}"
-
 
 engine_test = create_async_engine(TEST_DB_URL, poolclass=NullPool)
 async_session_maker = sessionmaker(engine_test, class_=AsyncSession, expire_on_commit=False)
@@ -69,7 +66,7 @@ async def prepare_database():
 
     async with async_session_maker() as session:
         await create_test_users(session)
-    # todo
+    # todo # pass session
     # await init_fake_data(limit=10)
 
     yield

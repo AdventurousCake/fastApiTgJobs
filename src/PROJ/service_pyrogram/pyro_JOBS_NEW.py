@@ -55,8 +55,7 @@ class VacancyFilter:
     SENIOR_KEYS_EXCLUDE = ("middle", "junior")
     REMOTE_KEYS = ("#удаленка", "#remote", "#удаленно")
     STARTUP_KEYS = ("стартап",)
-    BIGTECH_RU_KEYS = ("yandex", "sber", 'яндекс',
-                       'сбер', 'team.vk', 'kaspersky')
+    BIGTECH_RU_KEYS = ("yandex", "sber", 'яндекс', 'сбер', 'team.vk', 'kaspersky')
 
     ONLY_VACANCIES_CHANNELS = ("job_python", "python_djangojobs", "p_rabota")
     OFFICE_KEYS = ("#офис",)
