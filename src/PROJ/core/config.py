@@ -1,3 +1,4 @@
+import json
 import logging
 
 from dotenv import load_dotenv, find_dotenv
@@ -7,7 +8,6 @@ import os
 #     app_title: str = 'app'
 #     database_url: str
 #     secret: str = 'SECRET'
-
 #     class Config:
 #         env_file = '.env'
 # settings = Settings() 
@@ -58,6 +58,10 @@ ADMIN_PANEL_ENABLED = os.getenv("ADMIN_PANEL_ENABLED")
 
 # pyro
 TG_SESSION_STRING = os.getenv("TG_SESSION_STRING")
+
+# google
+GOOGLE_CREDENTIALS_FILE_STR = os.getenv("GOOGLE_CREDENTIALS_FILE_STR")
+GOOGLE_CREDENTIALS_JSON = json.loads(GOOGLE_CREDENTIALS_FILE_STR)
 
 if __name__ == "__main__":
     print(env_file)

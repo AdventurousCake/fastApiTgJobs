@@ -79,7 +79,7 @@ class ImageUploader:
         pass
 
     # @classmethod
-    async def upload(self, file_ids: list, client) -> dict:
+    async def upload(self, file_ids: list | set, client) -> dict:
         files_dict = {}
         # for file_id in file_ids:
         while file_ids:

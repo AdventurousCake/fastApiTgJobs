@@ -2,7 +2,7 @@ import asyncio
 import logging
 import threading
 
-from src.PROJ.service_pyrogram.API_google_sheets_private import g_table_main
+from src.PROJ.service_pyrogram.gtable_crud import g_table_main
 from src.PROJ.service_pyrogram.pyro_JOBS_NEW import ScrapeVacancies
 
 
