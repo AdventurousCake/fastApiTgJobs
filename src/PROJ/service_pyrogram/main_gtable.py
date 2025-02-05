@@ -3,7 +3,7 @@ import logging
 import threading
 
 from src.PROJ.service_pyrogram.gtable_crud import g_table_main
-from src.PROJ.service_pyrogram.pyro_JOBS_NEW import ScrapeVacancies
+from src.PROJ.service_pyrogram.pyro_JOBS import ScrapeVacancies
 
 
 async def main():

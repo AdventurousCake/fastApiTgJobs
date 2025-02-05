@@ -1,17 +1,15 @@
 import asyncio
 import itertools
 import logging
-import re
-from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import List
 
-from pydantic import ValidationError
 from pyrogram import Client
-from pyrogram.types import Message
 
 from src.PROJ.api.schemas_jobs import VacancyData
-from src.PROJ.core.config import TG_SESSION_STRING
+from src.PROJ.core.config import TG_SESSION_STRING, MSG_LIMIT, MSG_MIN_DATE, PASS_SENIORS_TMP, \
+    TASK_EXECUTION_TIME_LIMIT, UNIQUE_FILTER, TARGET_CHATS, TARGET_CHATS_TEST
 from src.PROJ.core.utils import ImageUploader
+from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
 # logging.basicConfig(
 #     level="INFO",
@@ -21,185 +19,6 @@ from src.PROJ.core.utils import ImageUploader
 # logger = logging.getLogger("rich")
 
 logger = logging.getLogger(__name__)
-
-MSG_LIMIT = 500
-MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
-PASS_SENIORS_TMP = True
-TASK_EXECUTION_TIME_LIMIT = 60 * 5
-UNIQUE_FILTER = True
-
-TARGET_CHATS = [-1001328702818,
-                -1001049086457,
-                -1001154585596,
-                -1001292405242,
-                -1001650380394,
-                -1001850397538,
-                -1001164103043,
-                ]
-TARGET_CHATS_TEST = [-1001328702818,
-                     -1001049086457, ]
-
-
-class MsgFilter:
-    @staticmethod
-    def is_ads_and_img(message):
-        """нет текста и есть подпись"""
-        if not message.text and message.caption:
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def is_empty(message):
-        return True if not message.text else False
-
-
-class VacancyFilter:
-    VACANCY_PATTERN = re.compile(r"vacancy|#вакансия", re.IGNORECASE)
-    # bool(VACANCY_PATTERN.search(text))
-
-    # TUPLES ONLY
-    SENIOR_KEYS = ("#lead", "senior", "#teamlead ",
-                   "team lead", "#techlead", "#qa")
-    SENIOR_KEYS_EXCLUDE = ("middle", "junior")
-    REMOTE_KEYS = ("#удаленка", "#remote", "#удаленно")
-    STARTUP_KEYS = ("стартап", "startup")
-    BIGTECH_RU_KEYS = ("yandex", "sber", 'яндекс', 'сбер', 'team.vk', 'kaspersky')
-
-    ONLY_VACANCIES_CHANNELS = ("job_python", "python_djangojobs", "p_rabota")
-    OFFICE_KEYS = ("#офис",)
-
-    @staticmethod
-    def is_simple_filter(text, keys) -> bool:
-        return any(key in text for key in keys)
-
-    @staticmethod
-    def is_bigtech(text):
-        return VacancyFilter.is_simple_filter(text, VacancyFilter.BIGTECH_RU_KEYS)
-
-    @staticmethod
-    def is_vacancy(text: str, chat_username: str) -> bool:
-        return bool(
-            VacancyFilter.VACANCY_PATTERN.search(text)
-            or chat_username in VacancyFilter.ONLY_VACANCIES_CHANNELS
-        )
-
-    @staticmethod
-    def is_senior_position(text):
-        if (any(key in text
-                for key in VacancyFilter.SENIOR_KEYS)
-
-                and not any(key in text
-                            for key in VacancyFilter.SENIOR_KEYS_EXCLUDE)):
-            return True
-
-    @staticmethod
-    def is_remote(text):
-        return any(key in text for key in VacancyFilter.REMOTE_KEYS)
-
-    @staticmethod
-    def is_startup(text):
-        return any(key in text for key in VacancyFilter.STARTUP_KEYS)
-
-
-class MessageParser:
-    __CONTACT_PATTERNS = {
-        'url': re.compile(r'([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])'),
-        'email': re.compile(r'[\w.+-]+@[\w-]+\.[\w.-]+'),
-        'username': re.compile(r'@\w+')
-    }
-
-    async def parse_message(self, message: Message, chat_username: str) -> Optional[VacancyData]:
-        if not message.text and not message.caption:
-            return None
-
-        if MsgFilter().is_ads_and_img(message):
-            return None
-
-        # MAIN
-        text = message.text
-        text_low = text.lower()
-
-        vacancy_filter = VacancyFilter()
-        if not vacancy_filter.is_vacancy(text_low, chat_username):
-            return None
-
-        # bool
-        level = False if vacancy_filter.is_senior_position(text_low) else True
-        if PASS_SENIORS_TMP and level == False:
-            return None
-        remote = True if vacancy_filter.is_remote(text_low) else False
-        startup = True if vacancy_filter.is_startup(text_low) else False
-
-        is_bigtech = vacancy_filter.is_bigtech(text_low)
-
-        contacts = self.extract_contacts(text_low)
-        username = (
-            message.sender_chat.username
-            if message.sender_chat
-            else (message.from_user.username if message.from_user else None)
-        )
-        user_tg_id = message.from_user.id if message.from_user else None
-        user_image_id = message.from_user.photo.small_file_id if (
-                message.from_user and message.from_user.photo) else None
-
-        button_url = self.extract_button_url(message)
-        chat_id = message.chat.id
-
-        # tags = self.extract_tags(text_low)
-        # print(tags)
-
-        text_cleaned = re.sub(
-            pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
-        text_cleaned = text_cleaned.lstrip()
-
-        try:
-            v_data = VacancyData(
-                level=level,
-                remote=remote,
-                startup=startup,
-                is_bigtech=is_bigtech,
-                text_=text_cleaned,
-                contacts=contacts,
-                user_username=username,
-                user_tg_id=user_tg_id,
-                user_image_id=user_image_id,
-                posted_at=message.date,
-                msg_url=message.link,
-                chat_username=chat_username,
-                chat_id=chat_id,
-                views=message.views,
-                button_url=button_url,
-            )
-        except ValidationError as e:
-            logging.error(e)
-            return None
-
-        return v_data
-
-    @staticmethod
-    def extract_contacts(text: str) -> str:
-        contacts = []
-        for pattern_name, pattern in MessageParser.__CONTACT_PATTERNS.items():
-            matches = pattern.findall(text)
-            if matches:
-                if pattern_name == "url":
-                    contacts.extend(["".join(match) for match in matches])
-                else:
-                    contacts.extend(matches)
-        return "; ".join(contacts)
-
-    @staticmethod
-    def extract_button_url(message: Message) -> Optional[str]:
-        """tg button under msg"""
-        if message.reply_markup and message.reply_markup.inline_keyboard:
-            return message.reply_markup.inline_keyboard[0][0].url
-        return None
-
-    @staticmethod
-    def extract_tags(text: str) -> List[str]:
-        pattern = r"#[\wа-яА-ЯёЁ]+"
-        return [tag.strip() for tag in re.findall(pattern, text)]
 
 
 class TelegramClient:
@@ -274,9 +93,9 @@ class ScrapeVacancies:
             f"""Starting job search.
             USING ENV KEY TG SESSION
             TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;
-            {MSG_LIMIT=};
+            { MSG_LIMIT=};
             MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
-            {UNIQUE_FILTER=}
+            { UNIQUE_FILTER=}
             ======================================
             PASS seniors (temporary): {PASS_SENIORS_TMP}
             Target chats ({len(self.target_chats)}): {self.target_chats}
