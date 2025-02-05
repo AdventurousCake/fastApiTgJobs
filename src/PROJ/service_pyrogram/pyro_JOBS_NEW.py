@@ -17,10 +17,8 @@ from src.PROJ.core.utils import ImageUploader
 #     level="INFO",
 #     format="%(message)s",
 #     datefmt="[%X]",
-#     handlers=[RichHandler(rich_tracebacks=True, console=console)],
-# )
+#     handlers=[RichHandler(rich_tracebacks=True, console=console)],)
 # logger = logging.getLogger("rich")
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +27,17 @@ MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
 PASS_SENIORS_TMP = True
 TASK_EXECUTION_TIME_LIMIT = 60 * 5
 UNIQUE_FILTER = True
+
+TARGET_CHATS = [-1001328702818,
+                -1001049086457,
+                -1001154585596,
+                -1001292405242,
+                -1001650380394,
+                -1001850397538,
+                -1001164103043,
+                ]
+TARGET_CHATS_TEST = [-1001328702818,
+                     -1001049086457, ]
 
 
 class MsgFilter:
@@ -182,6 +191,7 @@ class MessageParser:
 
     @staticmethod
     def extract_button_url(message: Message) -> Optional[str]:
+        """tg button under msg"""
         if message.reply_markup and message.reply_markup.inline_keyboard:
             return message.reply_markup.inline_keyboard[0][0].url
         return None
@@ -196,12 +206,11 @@ class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
                  password: str = None, session_string: str = None):
         if not session_name:
-            logger.info("Starting in memory session client")
+            logger.warning("Starting in memory session client")
             self.client = Client(":memory:", session_string=session_string)
 
         else:
-            self.client = Client(session_name, api_id, api_hash,
-                                 phone_number=phone_number, password=password)
+            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
 
     async def __aenter__(self):
         await self.client.start()
@@ -251,19 +260,10 @@ class TelegramClient:
 class ScrapeVacancies:
     def __init__(self, target_chats=None, test_mode=False):
         if target_chats is None and not test_mode:
-            target_chats = [
-                -1001328702818,
-                -1001049086457,
-                -1001154585596,
-                -1001292405242,
-                -1001650380394,
-                -1001850397538,
-                -1001164103043,  # new
-            ]
+            target_chats = TARGET_CHATS
 
         elif test_mode:
-            target_chats = [-1001328702818,
-                            -1001049086457, ]
+            target_chats = TARGET_CHATS_TEST
         self.target_chats = target_chats
 
     # @classmethod
@@ -344,9 +344,5 @@ if __name__ == "__main__":
     # start_time = asyncio.get_event_loop().time()
     # end_time = asyncio.get_event_loop().time()
     # logger.info(f"Total execution time: {end_time - start_time:.2f} seconds")
-
-    # rich
-    # from rich.traceback import install
-    # install(show_locals=True)
 
     asyncio.run(ScrapeVacancies(test_mode=True).run())
