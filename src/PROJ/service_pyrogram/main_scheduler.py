@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository
-from src.PROJ.service_pyrogram.pyro_JOBS_NEW import ScrapeVacancies
+from src.PROJ.service_pyrogram.pyro_JOBS import ScrapeVacancies
 
 
 async def run():

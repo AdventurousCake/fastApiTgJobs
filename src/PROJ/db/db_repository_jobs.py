@@ -3,11 +3,13 @@ import logging
 from asyncpg import UniqueViolationError
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from src.PROJ.db.jobs_model import Jobs, HR
 from sqlalchemy import select, text, update
 
-from src.PROJ.core.db import async_session_factory
+from src.PROJ.core.db import async_session_factory, get_async_session
 
 
 class HrDataRepository:
@@ -39,7 +41,6 @@ class JobsDataRepository:
     async def get_all(cls, limit: int = 100, offset: int = None, **filter_by) -> list[Jobs]:
         async with async_session_factory() as session:
             q = select(Jobs).filter_by(**filter_by).limit(limit).offset(offset)
-
             print(q.compile(compile_kwargs={"literal_binds": True}))
 
             result = await session.execute(q)
@@ -163,7 +164,7 @@ class JobsDataRepository:
     async def clean_isnew_flag(cls):
         async with async_session_factory() as session:
             # new_data = {"is_new": True}
-            r = await session.execute(update(Jobs).where(Jobs.is_new == True)
+            q = await session.execute(update(Jobs).where(Jobs.is_new == True)
                                       .values(is_new=False).returning(Jobs.id))
             await session.commit()
-            return r.scalars().all()
+            return q.scalars().all()

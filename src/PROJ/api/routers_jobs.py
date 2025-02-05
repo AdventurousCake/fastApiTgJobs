@@ -9,8 +9,6 @@ from src.PROJ.core.limiter import limiter
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository
 
 log = logging.getLogger(__name__)
-"""type: str = Query(None, max_length=100)"""
-"""CommonsDep = Annotated[dict, Depends(common_parameters)]"""
 
 r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 

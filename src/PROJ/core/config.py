@@ -1,4 +1,6 @@
+import json
 import logging
+from datetime import datetime, timedelta
 
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -7,7 +9,6 @@ import os
 #     app_title: str = 'app'
 #     database_url: str
 #     secret: str = 'SECRET'
-
 #     class Config:
 #         env_file = '.env'
 # settings = Settings() 
@@ -59,6 +60,26 @@ ADMIN_PANEL_ENABLED = os.getenv("ADMIN_PANEL_ENABLED")
 # pyro
 TG_SESSION_STRING = os.getenv("TG_SESSION_STRING")
 
+# google
+GOOGLE_CREDENTIALS_FILE_STR = os.getenv("GOOGLE_CREDENTIALS_FILE_STR")
+GOOGLE_CREDENTIALS_JSON = json.loads(GOOGLE_CREDENTIALS_FILE_STR)
+
+MSG_LIMIT = 500
+MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
+PASS_SENIORS_TMP = True
+TASK_EXECUTION_TIME_LIMIT = 60 * 5
+UNIQUE_FILTER = True
+TARGET_CHATS = [-1001328702818,
+                -1001049086457,
+                -1001154585596,
+                -1001292405242,
+                -1001650380394,
+                -1001850397538,
+                -1001164103043,
+                ]
+TARGET_CHATS_TEST = [-1001328702818,
+                     -1001049086457, ]
+
+
 if __name__ == "__main__":
     print(env_file)
-    print(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")

@@ -1,9 +1,4 @@
-# create the app user
-#RUN addgroup -S app_user && adduser -S app_user -G app_user
-
-
-#FROM python:3.11-alpine; для alpine иногда нужна установка доп пакетов; slim-bullseye = debian
-# Separate "build" image
+# build
 FROM python:3.11-slim AS compile-image
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -17,15 +12,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app
 COPY . /app
 
-# "Run" image
-# set environment variables
+# run image
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 EXPOSE 8000
 
 CMD ["uvicorn", "src.PROJ.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
-# uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
-
-#export PYTHONPATH=$PYTHONPATH:/path/
-#CMD ["python", "src/PROJ/api/app.py"]
