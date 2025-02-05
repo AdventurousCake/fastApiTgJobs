@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from functools import cached_property
 from typing import Optional, Any
@@ -53,7 +54,8 @@ class VacancyData(BaseModel):
         if isinstance(data, dict):
             for k, v in data.items():
                 if k != 'text_' and isinstance(v, str):
-                    assert len(v) <= 256, f'{k} is too long. len: {len(v)}. {v}'
+                    logging.warning(f'Skip msg (ad):')
+                    assert len(v) <= 256, f'{k} is too long. len: {len(v)}. Text: {v:15}'
 
         return data
 
