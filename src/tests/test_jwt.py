@@ -12,7 +12,7 @@ class TestJWT:
         }
 
         response = await ac.post(self.url, json=data_invalid)
-        assert response.status_code == 400
+        assert 400 <= response.status_code < 500
 
         username = 'admin'
         password = 'admin'

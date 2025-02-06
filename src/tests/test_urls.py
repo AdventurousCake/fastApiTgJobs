@@ -1,7 +1,5 @@
 import pytest
 
-# from fastapi.testclient import TestClient as test_client
-
 # ROUTER_PREFIX = ''
 values_for_test = ["/jobs/hrs_all", "/jobs/jobs_all", "/docs"]
 @pytest.mark.parametrize("url", values_for_test)  # indirect=True
