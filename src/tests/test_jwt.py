@@ -1,5 +1,10 @@
+import json
+from pprint import pprint
+
 
 class TestJWT:
+    """url encoded data"""
+
     url = "/auth/jwt/login"
 
     async def test_jwt(self, ac):
@@ -11,8 +16,8 @@ class TestJWT:
             'password': password_invalid
         }
 
-        response = await ac.post(self.url, json=data_invalid)
-        assert 400 <= response.status_code < 500
+        response = await ac.post(self.url, data=data_invalid)
+        assert response.status_code == 400
 
         username = 'admin'
         password = 'admin'
@@ -21,5 +26,5 @@ class TestJWT:
             'password': password
         }
 
-        response = await ac.post(self.url, json=data)
+        response = await ac.post(self.url, data=data)
         assert response.status_code == 200
