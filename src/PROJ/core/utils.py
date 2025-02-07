@@ -4,8 +4,8 @@ from datetime import datetime
 from pprint import pprint
 from typing import List
 
+import aiohttp
 import httpx
-from aiohttp import ClientSession
 
 from src.PROJ.api.schemas_jobs import VacancyData
 
@@ -35,7 +35,7 @@ class DataSaver:
 
 class ImageUploader:
     async def _upload_to_tgraph(self, f_bytes):
-        async with ClientSession() as session:
+        async with aiohttp.ClientSession() as session:
             url = 'https://telegra.ph/upload'
 
             resp = await session.post(url, data={'file': f_bytes}, timeout=10)
@@ -57,9 +57,20 @@ class ImageUploader:
                 'userhash': ''
             }
 
-            response = await client.post(url, files=files, data=data, timeout=10)
-            logger.warning(f"upload img status: {response.status_code}, response: {response}")
+            try:
+                response = await client.post(url, files=files, data=data, timeout=10)
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                logger.error(f"upload img status: {e.response.status_code}, response: {e.response.text}")
+                raise
+            except httpx.TimeoutException as e:
+                logger.error(f"upload img timeout: {e}")
+                raise
+            except Exception as e:
+                logger.error(f"upload img error: {e}")
+                raise
 
+            logger.warning(f"upload img status: {response.status_code}, response: {response}")
             response = response.text
             return response
 

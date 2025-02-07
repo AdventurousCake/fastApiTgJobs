@@ -41,7 +41,6 @@ class Base(DeclarativeBase):
 if config.MODE == "TEST":
     DATABASE_URL = config.TEST_DB_URL
     DATABASE_PARAMS = {"poolclass": NullPool}
-    # DATABASE_PARAMS = {}
 else:
     DATABASE_URL = config.DB_URL
     DATABASE_PARAMS = {}
@@ -68,11 +67,11 @@ async def init_models(drop=False):
 
         await conn.run_sync(Base.metadata.create_all)
 
-        print(f"INIT {DATABASE_URL}; tables in metadata:")
+        logging.warning(f"INIT {DATABASE_URL}; tables in metadata:")
         _table_names = [
             table_name for table_name in Base.metadata.tables.keys()]
         for table_name in _table_names:
-            print(table_name)
+            logging.warning(table_name)
 
         # other METADATA
         # await conn.run_sync(metadata.create_all)
