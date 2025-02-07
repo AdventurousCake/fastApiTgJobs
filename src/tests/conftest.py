@@ -1,10 +1,12 @@
 import asyncio
+import logging
 import random
 from typing import AsyncGenerator
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.pool import NullPool
@@ -30,8 +32,8 @@ app.dependency_overrides['engine_async'] = engine_test
 async def create_test_users(session: AsyncSession):
     test_users = [
         {
-            "email": "admin@test.com",
-            "username": "admin",
+            "email": "admin_pytest@test.com",
+            "username": "admin_pytest",
             "password": "admin123",
             "is_superuser": True,
             "role_id": 1
@@ -57,6 +59,10 @@ async def create_test_users(session: AsyncSession):
         session.add(user)
     
     await session.commit()
+    logging.warning(f"Test users created: {test_users}")
+
+    q = await session.execute(select(User))
+    logging.warning(f"All users: {q.scalars().all()}")
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -66,6 +72,7 @@ async def prepare_database():
 
     async with async_session_maker() as session:
         await create_test_users(session)
+
     # todo # pass session
     # await init_fake_data(limit=10)
 
@@ -91,9 +98,16 @@ test_client = TestClient(app)
 async def ac() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac
-        
-        
+
+
 # test
+# @pytest.fixture(scope="module")
+# def mock_db():
+#     # Inmemory SQLite
+#     engine = create_engine("sqlite:///:memory:")
+#     Base.metadata.create_all(engine)
+#     return session()
+
 @pytest.fixture
 async def test_user_token(ac: AsyncClient) -> str:
     response = await ac.post(
@@ -105,4 +119,5 @@ async def test_user_token(ac: AsyncClient) -> str:
 @pytest.fixture
 async def authorized_client(ac: AsyncClient, test_user_token: str) -> AsyncClient:
     ac.headers["Authorization"] = f"Bearer {test_user_token}"
+    logging.warning(ac)
     return ac

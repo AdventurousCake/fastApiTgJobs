@@ -33,11 +33,12 @@ date_default_now = Annotated[
 updated_at = Annotated[
     DateTime, mapped_column(DateTime,
                             server_default=text("TIMEZONE('utc', now())"),
-                            onupdate=datetime.utcnow()
-                            )
+                            onupdate=datetime.utcnow())
     # DateTime, mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 ]
 
+class IntIdPkMixin:
+    id: Mapped[intpk]
 
 class DefaultBase(Base):
     __abstract__ = True

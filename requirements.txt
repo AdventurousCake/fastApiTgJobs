@@ -19,6 +19,7 @@ sqladmin[full]==0.20.1
 requests~=2.32.3
 apscheduler~=3.10.4
 fastapi-cache2[redis]
+orjson
 
 Faker~=27.0.0
 
