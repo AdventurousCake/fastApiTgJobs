@@ -27,7 +27,6 @@ class TelegramClient:
         if not session_name:
             logger.warning("Starting in memory session client")
             self.client = Client(":memory:", session_string=session_string)
-
         else:
             self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
 
@@ -62,9 +61,7 @@ class TelegramClient:
             if message.date < MSG_MIN_DATE:
                 continue
 
-            parsed_message = await MessageParser().parse_message(
-                message, chat_data.username
-            )
+            parsed_message = await MessageParser().parse_message(message, chat_data.username)
             if parsed_message:
                 # check unique
                 if UNIQUE_FILTER:

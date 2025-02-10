@@ -90,10 +90,11 @@ def create_app(create_custom_static_urls: bool = False) -> FastAPI:
         ],
         # ["*"],
     )
-
+    
+    # static folder
     app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
-    # LIMIT
+    # limit
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

@@ -27,11 +27,8 @@ int64pk_auto = Annotated[int, mapped_column(BigInteger, primary_key=True, autoin
 big_int = Annotated[int, mapped_column(BigInteger)]
 
 date_default_none = Annotated[DateTime, mapped_column(DateTime, default=None)]
-date_default_now = Annotated[
-    DateTime, mapped_column(DateTime, server_default=text("TIMEZONE('utc', now())"))
-]
-updated_at = Annotated[
-    DateTime, mapped_column(DateTime,
+date_default_now = Annotated[DateTime, mapped_column(DateTime, server_default=text("TIMEZONE('utc', now())"))]
+updated_at = Annotated[DateTime, mapped_column(DateTime,
                             server_default=text("TIMEZONE('utc', now())"),
                             onupdate=datetime.utcnow())
     # DateTime, mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

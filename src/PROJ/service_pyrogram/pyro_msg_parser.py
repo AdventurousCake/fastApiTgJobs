@@ -42,7 +42,7 @@ class MessageParser:
         is_bigtech = vacancy_filter.is_bigtech(text_low)
 
         contacts = self.extract_contacts(text_low)
-        username = (
+        user_username = (
             message.sender_chat.username
             if message.sender_chat
             else (message.from_user.username if message.from_user else None)
@@ -57,8 +57,7 @@ class MessageParser:
         # tags = self.extract_tags(text_low)
         # print(tags)
 
-        text_cleaned = re.sub(
-            pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
+        text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
         text_cleaned = text_cleaned.lstrip()
 
         try:
@@ -69,7 +68,7 @@ class MessageParser:
                 is_bigtech=is_bigtech,
                 text_=text_cleaned,
                 contacts=contacts,
-                user_username=username,
+                user_username=user_username,
                 user_tg_id=user_tg_id,
                 user_image_id=user_image_id,
                 posted_at=message.date,
@@ -95,7 +94,7 @@ class MessageParser:
                     contacts.extend(["".join(match) for match in matches])
                 else:
                     contacts.extend(matches)
-        return "; ".join(contacts)
+        return "\n".join(contacts)
 
     @staticmethod
     def extract_button_url(message: Message) -> Optional[str]:
