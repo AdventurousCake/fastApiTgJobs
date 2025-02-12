@@ -1,18 +1,18 @@
 # build
-FROM python:3.11-slim AS compile-image
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir --prefer-binary  -r requirements.txt
-
-FROM python:3.11-slim
-COPY --from=compile-image /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+FROM python:3.12-slim AS builder
 WORKDIR /app
-COPY . /app
+COPY requirements.txt .
+RUN pip install --upgrade setuptools \
+ && pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir --prefer-binary --user -r requirements.txt
 
-# run image
+# use build
+FROM python:3.12-slim
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
+COPY . .
+ENV PATH=/root/.local/bin:$PATH
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 

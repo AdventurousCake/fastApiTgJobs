@@ -147,8 +147,8 @@ class ScrapeVacancies:
                     all_messages_new.append(message)  # message.model_dump()
 
         unique_count = len(set([m.msg_url for m in all_messages_new]))
-        logger.warning(f'Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}')
+        logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
+                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}[/]')
         # post proc
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())

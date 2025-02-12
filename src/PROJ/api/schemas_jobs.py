@@ -50,12 +50,14 @@ class VacancyData(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def check_str_limits(cls, data: Any) -> Any:
-        """db limits"""
+        """Filter ads; +db limits"""
         if isinstance(data, dict):
             for k, v in data.items():
                 if k != 'text_' and isinstance(v, str):
-                    logging.warning(f'Skip msg (ad):')
-                    assert len(v) <= 256, f'{k} is too long. len: {len(v)}. Text: {v:15}'
+                    try:
+                        assert len(v) <= 256, f'{k} is too long. len: {len(v)}. Text: {v[:25]}'
+                    except AssertionError:
+                        logging.warning(f'Skip msg (ad)')
 
         return data
 
