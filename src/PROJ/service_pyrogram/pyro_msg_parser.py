@@ -57,6 +57,7 @@ class MessageParser:
         # tags = self.extract_tags(text_low)
         # print(tags)
 
+        # clean #tags
         text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
         text_cleaned = text_cleaned.lstrip()
 

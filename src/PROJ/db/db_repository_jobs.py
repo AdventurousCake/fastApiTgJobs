@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.PROJ.db.jobs_model import Jobs, HR
+from src.PROJ.db.models_jobs import Jobs, HR
 from sqlalchemy import select, text, update
 
 from src.PROJ.core.db import async_session_factory, get_async_session

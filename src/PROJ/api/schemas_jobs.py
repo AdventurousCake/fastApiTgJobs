@@ -13,7 +13,7 @@ class VacancyData(BaseModel):
     startup: bool
     is_bigtech: Optional[bool] = Field(default=None)
 
-    text_: str
+    text_: str = Field(max_length=4096)
     contacts: str
     user_username: Optional[str] = Field(default=None)
     posted_at: datetime
@@ -44,22 +44,30 @@ class VacancyData(BaseModel):
         if self.msg_url:
             return self.msg_url.split("/")[3]
 
+    @property
+    def deeplink_PROP(self) -> str:
+        """docs: https://core.telegram.org/api/links#message-links"""
+        if self.msg_url:
+            chat = self.msg_url.split("/")[3]
+            msg_id = self.msg_url.split("/")[5]
+            return f"tg://resolve?domain={chat}&post={msg_id}"
+
     def as_dict(self) -> dict[str, str | int]:  # or .model_dump()
         return self.__dict__
 
-    @model_validator(mode='before')
-    @classmethod
-    def check_str_limits(cls, data: Any) -> Any:
-        """Filter ads; +db limits"""
-        if isinstance(data, dict):
-            for k, v in data.items():
-                if k != 'text_' and isinstance(v, str):
-                    try:
-                        assert len(v) <= 256, f'{k} is too long. len: {len(v)}. Text: {v[:25]}'
-                    except AssertionError:
-                        logging.warning(f'Skip msg (ad)')
-
-        return data
+    #todo
+    # @model_validator(mode='before')
+    # @classmethod
+    # def check_str_limits(cls, data: Any) -> Any:
+    #     """Filter contacts ads; +db limits"""
+    #     if isinstance(data, dict):
+    #         for k, v in data.items():
+    #             if k != 'contacts' and isinstance(v, str):
+    #                 try:
+    #                     assert len(v) <= 256, f'{k} is too long. len: {len(v)}. Text: {v[:25]}'
+    #                 except AssertionError:
+    #                     logging.warning(f'Skip msg (ad)')
+    #     return data
 
 class VacancyDataGTableExport(VacancyData):
     # @computed_field
