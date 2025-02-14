@@ -7,8 +7,7 @@ from src.PROJ.api.create_fastapi_app import create_app
 from src.PROJ.api.routers_jobs import r_jobs
 from src.PROJ.users.user_routers import router_users
 
-logging.basicConfig(
-    level="INFO",
+logging.basicConfig(level="INFO",
     format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)],  # markup=True
 )
 # logging.basicConfig(level="NOTSET",format="%(message)s",datefmt="[%X]",handlers=[RichHandler(markup=True)]#Handler())

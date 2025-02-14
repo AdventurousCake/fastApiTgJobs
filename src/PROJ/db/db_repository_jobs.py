@@ -131,9 +131,7 @@ class JobsDataRepository:
                 elif isinstance(data, dict):
                     q = insert(Jobs).values(**data)
                 else:
-                    raise ValueError(
-                        "Data must be either a list of dictionaries or a single dictionary"
-                    )
+                    raise ValueError("Data must be either a list of dictionaries or a single dictionary")
 
                 """
                 https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#specifying-the-target

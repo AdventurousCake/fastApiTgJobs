@@ -61,7 +61,7 @@ def generate_data(limit) -> tuple:
 async def init_fake_data(session, limit=5):
     vacancy_data, hr_data = generate_data(limit)
 
-    async with session:
+    async with session.begin():
         # hr first
         q1 = await session.scalars(insert(HR).values(hr_data).returning(HR.id))
         q2 = await session.scalars(insert(Jobs).values(vacancy_data).returning(Jobs.id))

@@ -2,11 +2,14 @@ import logging
 
 from fastapi import Query, Depends, APIRouter
 from fastapi_cache.decorator import cache
+from sqlalchemy import select, text
 
 from src.PROJ.api.schemas_jobs import SHr, VacancyData
+from src.PROJ.core.db import async_session_factory
 from src.PROJ.core.dependencies import filter_params
 from src.PROJ.core.limiter import limiter
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository
+from src.PROJ.db.models_jobs import Jobs
 
 log = logging.getLogger(__name__)
 
@@ -26,9 +29,14 @@ async def hrs_all(params=Depends(filter_params)):
     data = await HrDataRepository.get_all(**params)
     return data
 
-# @r_jobs.get('/')
-# async def get_filtered(request: Request, params=Depends(filter_params)):
-#     data = await JobsDataRepository.get_all(**params)
-#     return [m.to_dict() for m in data]
+@cache(expire=60)
+@r_jobs.get("/search", response_model=list[VacancyData])
+async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=255)):
+    async with async_session_factory() as session:
+        q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%"))
+        result = await session.execute(q)
+        data = result.unique().scalars().all()
+        return data
+
 
 # tst endpoints shelf
