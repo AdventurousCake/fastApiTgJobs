@@ -10,7 +10,7 @@ async def main():
     data = await ScrapeVacancies(test_mode=False).run()
     data = data.get("all_messages")
 
-    asyncio.to_thread(g_table_main, data)
+    await asyncio.to_thread(g_table_main, data)
     # tr1 = threading.Thread(target=g_table_main, args=(data,), name="gtable_thread").start()
 
     logging.warning("Saving to google sheets...")

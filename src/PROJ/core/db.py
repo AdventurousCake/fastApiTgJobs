@@ -45,7 +45,7 @@ else:
     DATABASE_URL = config.DB_URL
     DATABASE_PARAMS = {}
 
-logging.warning(f"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nMODE: {config.MODE}\n{DATABASE_URL}\n\n")
+logging.warning(f"!!!!!!!!!!!!!!!!!!!!!!\nMODE: {config.MODE}\n{DATABASE_URL}\n\n")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
