@@ -10,6 +10,7 @@ from src.PROJ.core.dependencies import filter_params
 from src.PROJ.core.limiter import limiter
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository
 from src.PROJ.db.models_jobs import Jobs
+from src.PROJ.users.user_main import current_active_user
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ async def hrs_all(params=Depends(filter_params)):
     return data
 
 @cache(expire=60)
-@r_jobs.get("/search", response_model=list[VacancyData])
+@r_jobs.get("/search", response_model=list[VacancyData], dependencies=[Depends(current_active_user)])
 async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=255)):
     async with async_session_factory() as session:
         q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%"))

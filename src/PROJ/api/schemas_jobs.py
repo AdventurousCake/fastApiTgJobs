@@ -6,7 +6,7 @@ from typing import Optional, Any
 from pydantic import BaseModel, Field, computed_field, field_serializer, model_validator, model_serializer
 
 class VacancyData(BaseModel):
-    """v0302"""
+    """v1402"""
 
     level: bool
     remote: bool
@@ -58,20 +58,6 @@ class VacancyData(BaseModel):
 
     def as_dict(self) -> dict[str, str | int]:  # or .model_dump()
         return self.__dict__
-
-    #todo
-    # @model_validator(mode='before')
-    # @classmethod
-    # def check_str_limits(cls, data: Any) -> Any:
-    #     """Filter contacts ads; +db limits"""
-    #     if isinstance(data, dict):
-    #         for k, v in data.items():
-    #             if k != 'contacts' and isinstance(v, str):
-    #                 try:
-    #                     assert len(v) <= 256, f'{k} is too long. len: {len(v)}. Text: {v[:25]}'
-    #                 except AssertionError:
-    #                     logging.warning(f'Skip msg (ad)')
-    #     return data
 
 class VacancyDataGTableExport(VacancyData):
     # @computed_field
