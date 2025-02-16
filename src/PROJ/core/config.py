@@ -17,22 +17,20 @@ import os
 env_file = find_dotenv(".env")
 env = load_dotenv(env_file)
 if not env:
-    logging.critical("!!! no .env file")
+    logging.critical("No .env file")
+
+
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "postgres")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASS = os.getenv("DB_PASS", "postgres")
 
 MODE = os.getenv("MODE")
 if MODE == "DOCKER":
     DB_HOST = os.getenv("DB_HOST", "pg")
-    DB_PORT = os.getenv("DB_PORT", "5432")
-    DB_NAME = os.getenv("DB_NAME", "postgres")
-    DB_USER = os.getenv("DB_USER", "postgres")
-    DB_PASS = os.getenv("DB_PASS", "postgres")
 
 else:
     DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = os.getenv("DB_PORT", "5432")
-    DB_NAME = os.getenv("DB_NAME", "postgres")
-    DB_USER = os.getenv("DB_USER", "postgres")
-    DB_PASS = os.getenv("DB_PASS", "postgres")
 
 # for testing
 TEST_DB_HOST = os.getenv("TEST_DB_HOST")
@@ -69,6 +67,7 @@ MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
 PASS_SENIORS_TMP = True
 TASK_EXECUTION_TIME_LIMIT = 60 * 5
 UNIQUE_FILTER = True
+IMG_SAVE = False
 TARGET_CHATS = [-1001328702818,
                 -1001049086457,
                 -1001154585596,

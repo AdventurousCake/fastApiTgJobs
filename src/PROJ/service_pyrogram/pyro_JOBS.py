@@ -7,7 +7,7 @@ from pyrogram import Client
 
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import TG_SESSION_STRING, MSG_LIMIT, MSG_MIN_DATE, PASS_SENIORS_TMP, \
-    TASK_EXECUTION_TIME_LIMIT, UNIQUE_FILTER, TARGET_CHATS, TARGET_CHATS_TEST
+    TASK_EXECUTION_TIME_LIMIT, UNIQUE_FILTER, TARGET_CHATS, TARGET_CHATS_TEST, IMG_SAVE
 from src.PROJ.core.utils import ImageUploader
 from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
@@ -42,7 +42,6 @@ class TelegramClient:
         print(f"{current * 100 / total:.1f}%")
 
     async def file_id_to_bytes(self, file_id):
-        # progress=self.progress
         file = await self.client.download_media(file_id, in_memory=True, block=True)
         file_bytes = bytes(file.getbuffer())
         file_name = file.name
@@ -93,6 +92,7 @@ class ScrapeVacancies:
             { MSG_LIMIT=};
             MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
             { UNIQUE_FILTER=}
+            { IMG_SAVE=}
             ======================================
             PASS seniors (temporary): {PASS_SENIORS_TMP}
             Target chats ({len(self.target_chats)}): {self.target_chats}
@@ -112,15 +112,14 @@ class ScrapeVacancies:
             chat_results: List[List[VacancyData] | Exception] = await asyncio.gather(*tasks, return_exceptions=True)
 
             chat_results_flat = list(itertools.chain(*chat_results))
-            # upd: separate load user photos
 
-            images_ids = set([message.user_image_id for message in chat_results_flat])
-            photos_ = await ImageUploader().upload(images_ids, client)
+            if IMG_SAVE:
+                images_ids = set([message.user_image_id for message in chat_results_flat])
+                photos_ = await ImageUploader().upload(images_ids, client)
 
         # not separated by chats
         all_messages_new: List[VacancyData] = []
         hrs = {}
-        # hrs_cnt = []
         errors = []
 
         for idx, result in enumerate(chat_results):
@@ -134,6 +133,8 @@ class ScrapeVacancies:
                 else:
                     logger.error(f"Error in get_chat_data", exc_info=result)
                 errors.append(result)
+
+            # good result
             else:
                 for message in result:
                     # check if channel
@@ -143,9 +144,12 @@ class ScrapeVacancies:
 
                     hrs.update({user_tg_id: message.user_username})
 
-                    message.user_image_url = photos_.get(message.user_image_id)
+                    if IMG_SAVE:
+                        message.user_image_url = photos_.get(message.user_image_id)
+
                     all_messages_new.append(message)  # message.model_dump()
 
+        # unique by url
         unique_count = len(set([m.msg_url for m in all_messages_new]))
         logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
                        f'Unique HRs {len(hrs)}. Errors: {len(errors)}[/]')

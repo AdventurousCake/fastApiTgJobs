@@ -1,6 +1,6 @@
 from sqladmin import Admin, ModelView
 
-from src.PROJ.db.jobs_model import Jobs, HR
+from src.PROJ.db.models_jobs import Jobs, HR
 from src.PROJ.users.user_models import User
 
 

@@ -28,6 +28,7 @@ templates = Jinja2Templates(BASE_DIR / "templates")
 
 async def on_startup():
     # log.warning("skip db init; ALEMBIC\n")
+    log.warning('[bold red]init models[/]', extra={"markup": True})
     await init_models(drop=True)
 
     log.warning('[bold red]create superuser admin@admin.com[/]', extra={"markup": True})

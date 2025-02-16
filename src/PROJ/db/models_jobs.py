@@ -1,15 +1,7 @@
 from datetime import datetime
 from enum import Enum, auto
 from typing import Annotated, Optional
-from sqlalchemy import (
-    String,
-    DateTime,
-    UniqueConstraint,
-    ForeignKey,
-    text,
-    Index,
-    BigInteger,
-)
+from sqlalchemy import String, DateTime, UniqueConstraint, ForeignKey, text, Index, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.PROJ.core.db import Base, str_256
@@ -20,6 +12,7 @@ class Level(Enum):
     middle = auto()
     senior = auto()
 
+
 intpk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 int64pk = Annotated[int, mapped_column(BigInteger, primary_key=True, autoincrement=False)]
 int64pk_auto = Annotated[int, mapped_column(BigInteger, primary_key=True, autoincrement=True)]
@@ -29,13 +22,15 @@ big_int = Annotated[int, mapped_column(BigInteger)]
 date_default_none = Annotated[DateTime, mapped_column(DateTime, default=None)]
 date_default_now = Annotated[DateTime, mapped_column(DateTime, server_default=text("TIMEZONE('utc', now())"))]
 updated_at = Annotated[DateTime, mapped_column(DateTime,
-                            server_default=text("TIMEZONE('utc', now())"),
-                            onupdate=datetime.utcnow())
+                                               server_default=text("TIMEZONE('utc', now())"),
+                                               onupdate=datetime.utcnow())
     # DateTime, mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 ]
 
+
 class IntIdPkMixin:
     id: Mapped[intpk]
+
 
 class DefaultBase(Base):
     __abstract__ = True
@@ -91,5 +86,6 @@ class Jobs(Base):
     __table_args__ = (
         UniqueConstraint("msg_url", "text_", name="idx_uniq_link_text"),
         Index("idx_msg_url", "msg_url"),
+        Index("idx_text", "text_"),
         Index("idx_user_tg_id", "user_tg_id"),  # fkey index
     )

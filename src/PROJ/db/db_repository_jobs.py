@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.PROJ.db.jobs_model import Jobs, HR
+from src.PROJ.db.models_jobs import Jobs, HR
 from sqlalchemy import select, text, update
 
 from src.PROJ.core.db import async_session_factory, get_async_session
@@ -131,9 +131,7 @@ class JobsDataRepository:
                 elif isinstance(data, dict):
                     q = insert(Jobs).values(**data)
                 else:
-                    raise ValueError(
-                        "Data must be either a list of dictionaries or a single dictionary"
-                    )
+                    raise ValueError("Data must be either a list of dictionaries or a single dictionary")
 
                 """
                 https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#specifying-the-target

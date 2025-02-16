@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.db import async_session_factory, init_models
-from src.PROJ.db.jobs_model import HR, Jobs
+from src.PROJ.db.models_jobs import HR, Jobs
 
 fake = Faker(locale="ru_RU")
 
@@ -19,10 +19,12 @@ fake = Faker(locale="ru_RU")
 #         return hr.model_dump()
 #     return hr
 
-def generate_model_vd(dump=False) -> VacancyData | dict:
+def generate_model_vd(dump=False, text_len=None) -> VacancyData | dict:
     tg_url_schema = 'https://t.me/python_scripts_hr/' + str(random.randint(1000, 9999))
     tags_text = ['#vacancy', '#bigtech', '#remote', ' ']
     tags_text_str = ' '.join(tags_text)
+
+    text_ = tags_text_str + fake.text(max_nb_chars=50) if not text_len else "x" * text_len
 
     vd = VacancyData(
         level=fake.random_int(min=0, max=1),
@@ -30,7 +32,7 @@ def generate_model_vd(dump=False) -> VacancyData | dict:
         startup=fake.random_int(min=0, max=1),
         is_bigtech=fake.random_int(min=0, max=1),
 
-        text_=tags_text_str + fake.text(max_nb_chars=50),
+        text_=text_,
         contacts=fake.user_name(),
         user_username=fake.user_name(),
         user_tg_id=fake.random_int(min=100000, max=999999),
@@ -56,10 +58,10 @@ def generate_data(limit) -> tuple:
     return vacancy_data, hr_data
 
 
-async def init_fake_data(limit=5):
+async def init_fake_data(session, limit=5):
     vacancy_data, hr_data = generate_data(limit)
 
-    async with async_session_factory() as session:
+    async with session.begin():
         # hr first
         q1 = await session.scalars(insert(HR).values(hr_data).returning(HR.id))
         q2 = await session.scalars(insert(Jobs).values(vacancy_data).returning(Jobs.id))
@@ -70,7 +72,7 @@ async def init_fake_data(limit=5):
 
 async def main_test():
     await init_models()
-    await init_fake_data()
+    await init_fake_data(session=async_session_factory())
 
 
 if __name__ == '__main__':
