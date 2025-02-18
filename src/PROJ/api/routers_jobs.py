@@ -1,6 +1,7 @@
+import asyncio
 import logging
 
-from fastapi import Query, Depends, APIRouter
+from fastapi import Query, Depends, APIRouter, status
 from fastapi_cache.decorator import cache
 from sqlalchemy import select, text
 
@@ -10,6 +11,7 @@ from src.PROJ.core.dependencies import filter_params
 from src.PROJ.core.limiter import limiter
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository
 from src.PROJ.db.models_jobs import Jobs
+from src.PROJ.gtable.main_gtable import run_gtable
 from src.PROJ.users.user_main import current_active_user
 
 log = logging.getLogger(__name__)
@@ -39,5 +41,10 @@ async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=2
         data = result.unique().scalars().all()
         return data
 
+@r_jobs.get("/webhook-run", dependencies=[Depends(current_active_user)])
+async def webhook():
+    run = asyncio.create_task(run_gtable())
+    run.add_done_callback(lambda x: log.info("gtable webhook run done"))
+    return status.HTTP_200_OK
 
 # tst endpoints shelf

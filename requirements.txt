@@ -3,7 +3,7 @@ fastapi-users[sqlalchemy]
 uvicorn[standard]~=0.34
 alembic~=1.13.2
 asyncpg~=0.29.0
-sqlalchemy~=2.0.31
+sqlalchemy~=2.0.38
 #psycopg2-binary
 aiofiles
 aiohttp
@@ -16,8 +16,8 @@ pytest~=8.3.1
 pytest_asyncio
 slowapi~=0.1.9
 sqladmin[full]==0.20.1
-requests~=2.32.3
-apscheduler~=3.10.4
+requests~=2.32
+apscheduler~=3.10
 fastapi-cache2[redis]
 orjson
 
@@ -26,8 +26,8 @@ Faker~=27.0.0
 # jwt
 python-jose[cryptography]
 pyjwt~=2.8.0
-orjson~=3.10.6
-starlette~=0.38
+orjson~=3.10
+starlette~=0.40
 pydantic~=2.8.2
 colorama~=0.4.6
 python-dotenv~=1.0.1

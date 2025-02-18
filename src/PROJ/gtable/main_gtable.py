@@ -5,7 +5,7 @@ from src.PROJ.gtable.gtable_crud import g_table_main
 from src.PROJ.service_pyrogram.pyro_JOBS import ScrapeVacancies
 
 
-async def main():
+async def run_gtable():
     data = await ScrapeVacancies(test_mode=False).run()
     data = data.get("all_messages")
 
@@ -15,4 +15,4 @@ async def main():
     logging.warning("Saving to google sheets...")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(run_gtable())

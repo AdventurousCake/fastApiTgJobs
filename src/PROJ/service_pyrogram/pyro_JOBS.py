@@ -86,17 +86,17 @@ class ScrapeVacancies:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 
         logger.warning(
-            f"""Starting job search.
-            USING ENV KEY TG SESSION
-            TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;
-            { MSG_LIMIT=};
-            MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
-            { UNIQUE_FILTER=}
-            { IMG_SAVE=}
-            ======================================
-            PASS seniors (temporary): {PASS_SENIORS_TMP}
-            Target chats ({len(self.target_chats)}): {self.target_chats}
-            ======================================"""
+            f"Starting job search.\n"
+            f"USING ENV KEY TG SESSION\n"
+            f"TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;\n"
+            f"{ MSG_LIMIT=};\n"
+            f"MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}\n"
+            f"{ UNIQUE_FILTER=}\n"
+            f"{ IMG_SAVE=}\n"
+            f"======================================\n"
+            f"PASS seniors (temporary): {PASS_SENIORS_TMP}\n"
+            f"Target chats ({len(self.target_chats)}): {self.target_chats}\n"
+            f"======================================"
         )
 
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:

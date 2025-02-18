@@ -47,14 +47,14 @@ class VacancyData(BaseModel):
         if self.msg_url:
             return self.msg_url.split("/")[3]
 
-    @computed_field
-    @cached_property
-    def deeplink_PROP(self) -> str:
-        """docs: https://core.telegram.org/api/links#message-links"""
-        if self.msg_url:
-            chat = self.msg_url.split("/")[3]
-            msg_id = self.msg_url.split("/")[4]
-            return f"tg://resolve?domain={chat}&post={msg_id}"
+    # @computed_field
+    # @cached_property
+    # def deeplink_PROP(self) -> str:
+    #     """docs: https://core.telegram.org/api/links#message-links"""
+    #     if self.msg_url:
+    #         chat = self.msg_url.split("/")[3]
+    #         msg_id = self.msg_url.split("/")[4]
+    #         return f"tg://resolve?domain={chat}&post={msg_id}"
 
     def as_dict(self) -> dict[str, str | int]:  # or .model_dump()
         return self.__dict__
