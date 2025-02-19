@@ -77,13 +77,6 @@ async def init_models(drop=False):
         # await conn.run_sync(metadata.create_all)
 
 
-FORMAT = "%(message)s"
-logging.basicConfig(
-    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
-)
-log = logging.getLogger("rich")
-
-
 async def create_db_and_tables():
     async with engine_async.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

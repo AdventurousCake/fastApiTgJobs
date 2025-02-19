@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum, auto
 from typing import Annotated, Optional
-from sqlalchemy import String, DateTime, UniqueConstraint, ForeignKey, text, Index, BigInteger
+from sqlalchemy import String, DateTime, UniqueConstraint, ForeignKey, text, Index, BigInteger, Text, Computed, \
+    Constraint, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.PROJ.core.db import Base, str_256
@@ -56,8 +57,12 @@ class Jobs(Base):
     remote: Mapped[bool]
     is_bigtech: Mapped[Optional[bool]] = mapped_column(default=None)
 
-    text_: Mapped[str] = mapped_column(String(4096), nullable=False)
-    contacts: Mapped[str_256 | None]
+    # text_: Mapped[str] = mapped_column(String(4096), nullable=False)
+    text_: Mapped[str] = mapped_column(Text, CheckConstraint('length(text_)<=4096'), nullable=False)
+    md5_text: Mapped[str] = mapped_column(String(32), Computed("md5(text_)", persisted=True), nullable=False)
+
+    contacts: Mapped[str] = mapped_column(String(4096), nullable=True)
+    # contacts: Mapped[str_256 | None]
     user_tg_id: Mapped[big_int]
     user_username: Mapped[str_256 | None]
     user_image_id: Mapped[str_256 | None]
@@ -84,8 +89,8 @@ class Jobs(Base):
             return self.msg_url.split("/")[3]
 
     __table_args__ = (
-        UniqueConstraint("msg_url", "text_", name="idx_uniq_link_text"),
+        # UniqueConstraint("msg_url", "text_", name="idx_uniq_link_text"),
+        UniqueConstraint("msg_url", "md5_text", name="idx_uniq_link_text"),
         Index("idx_msg_url", "msg_url"),
-        Index("idx_text", "text_"),
         Index("idx_user_tg_id", "user_tg_id"),  # fkey index
     )

@@ -99,8 +99,8 @@ class JobsDataRepository:
                     # index_elements=('id', 'text_'), set_=dict(text_=q.excluded.text_) # dw
                     # index_elements=('id',), set_=dict(text_=q.excluded.text_)
                     # constraint='jobs_pkey',
+                    constraint='idx_uniq_link_text',
 
-                    index_elements=("msg_url", "text_"),  # Уникальность по msg_url и text_
                     set_=dict(
                         text_=q.excluded.text_,
                         updated_at=text("TIMEZONE('utc', now())"),
@@ -138,10 +138,7 @@ class JobsDataRepository:
                 constraint argument is used to specify an index directly rather than inferring it.
                 This can be the name of a UNIQUE constraint, a PRIMARY KEY constraint, or an INDEX:"""
 
-                # text_
-                q = q.on_conflict_do_nothing(
-                    index_elements=("msg_url", "text_"),  # v2
-                ).returning(Jobs.id)
+                q = q.on_conflict_do_nothing(constraint='idx_uniq_link_text').returning(Jobs.id)
 
                 print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
@@ -160,8 +157,8 @@ class JobsDataRepository:
 
     @classmethod
     async def clean_isnew_flag(cls):
+        """new_data = {"is_new": True}"""
         async with async_session_factory() as session:
-            # new_data = {"is_new": True}
             q = await session.execute(update(Jobs).where(Jobs.is_new == True)
                                       .values(is_new=False).returning(Jobs.id))
             await session.commit()
