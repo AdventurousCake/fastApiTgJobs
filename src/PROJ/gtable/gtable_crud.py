@@ -13,7 +13,7 @@ from src.PROJ.core.config import GOOGLE_CREDENTIALS_JSON
 
 ROOT_DIR = pathlib.Path(__file__).parent
 TABLE_ID_KEY = "1r24jFrWTHo5QMoG2mc32B6t7yQ32QsJcIyXuhOl1_2A"
-DEFAULT_WORKSHEET_INDEX = 3  # from zero
+DEFAULT_WORKSHEET_INDEX = 1  # from zero
 DEFAULT_WORKSHEET_NAME = 'PROD'
 FROZEN_HEADER_ROWS = 3
 
