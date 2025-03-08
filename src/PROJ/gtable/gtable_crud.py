@@ -86,14 +86,14 @@ class GTable:
             log.warning('DEV: Write test data')
             raise NotImplementedError
 
-        # v0502; noinspection PySetFunctionToLiteral
-        include_values = set(['level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username',
-                              'posted_at', 'user_image_url'])
-        log.info(f'Размерность include (len {len(include_values)}): A:{chr(len(include_values) + 96)}')
+        # v0502
+        include_values_set = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at',
+                          'user_image_url'}
+        log.info(f'Размерность include (len {len(include_values_set)}): A:{chr(len(include_values_set) + 96)}')
 
         # check first item
         if isinstance(data[0], VacancyData):
-            data = [data_item.model_dump(mode='json', include=include_values) for data_item in data]
+            data = [data_item.model_dump(mode='json', include=include_values_set) for data_item in data]
         else:
             raise ValueError('data must be list of VacancyData')
 
@@ -116,7 +116,7 @@ class GTable:
 
         target_row = 1
 
-        log_data = (f'[yellow] TABLE INFO:\n'
+        log_data = (f'[cyan] TABLE INFO:\n'
                     f'{pformat(self.get_info())}\n'
                     f'{sh_target.column_count=}, {sh_target.row_count=}\n'
                     f'{sh_target.frozen_row_count=}, {sh_target.frozen_col_count=}\n'
