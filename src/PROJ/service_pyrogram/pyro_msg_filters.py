@@ -20,7 +20,7 @@ class VacancyFilter:
     # bool(VACANCY_PATTERN.search(text))
 
     # TUPLES ONLY
-    SENIOR_KEYS = ("#lead", "senior", "#teamlead ", "team lead", "#techlead")
+    SENIOR_KEYS = ("#lead", "senior", "#teamlead", "team lead", "#techlead", "#c++")
     SENIOR_KEYS_EXCLUDE = ("middle", "junior")
     REMOTE_KEYS = ("#удаленка", "#remote", "#удаленно")
     STARTUP_KEYS = ("стартап", "startup")
@@ -49,8 +49,7 @@ class VacancyFilter:
         if (any(key in text
                 for key in VacancyFilter.SENIOR_KEYS)
 
-                and not any(key in text
-                            for key in VacancyFilter.SENIOR_KEYS_EXCLUDE)):
+                and not any(key in text for key in VacancyFilter.SENIOR_KEYS_EXCLUDE)):
             return True
 
     @staticmethod
