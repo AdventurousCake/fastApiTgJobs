@@ -77,16 +77,12 @@ class JobsDataRepository:
         """if list: значения должны быть однородными, кол-во полей одинаковое"""
         async with async_session_factory() as session:
             try:
-                # session.add(jobs)
-
                 if isinstance(data, list):
                     q = insert(Jobs).values(data)
                 elif isinstance(data, dict):
                     q = insert(Jobs).values(**data)
                 else:
-                    raise ValueError(
-                        "Data must be either a list of dictionaries or a single dictionary"
-                    )
+                    raise ValueError("Data must be either a list of dictionaries or a single dictionary")
 
                 """
                 https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#specifying-the-target
@@ -95,8 +91,6 @@ class JobsDataRepository:
 
                 # text_
                 q = q.on_conflict_do_update(
-                    # constraint='idx_uniq_id_text', set_=dict(text_=q.excluded.text_)
-                    # index_elements=('id', 'text_'), set_=dict(text_=q.excluded.text_) # dw
                     # index_elements=('id',), set_=dict(text_=q.excluded.text_)
                     # constraint='jobs_pkey',
                     constraint='idx_uniq_link_text',
@@ -108,7 +102,7 @@ class JobsDataRepository:
                     ),
                 ).returning(Jobs.id)
 
-                print("\n", q.compile(compile_kwargs={"literal_binds": True}))
+                # print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
 
                 ids = res.scalars().all()
@@ -140,7 +134,7 @@ class JobsDataRepository:
 
                 q = q.on_conflict_do_nothing(constraint='idx_uniq_link_text').returning(Jobs.id)
 
-                print("\n", q.compile(compile_kwargs={"literal_binds": True}))
+                # print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
 
                 ids = res.scalars().all()

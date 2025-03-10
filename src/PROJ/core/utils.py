@@ -24,8 +24,7 @@ class DataSaver:
         header = VacancyData.model_fields.keys()
 
         with open(filename, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(
-                f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
+            writer = csv.DictWriter(f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
             writer.writeheader()
             for row in data:
                 writer.writerow(row.model_dump())
