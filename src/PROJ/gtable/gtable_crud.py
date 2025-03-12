@@ -10,6 +10,7 @@ from rich.logging import RichHandler
 
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import GOOGLE_CREDENTIALS_JSON
+from src.PROJ.core.utils import time_counter
 
 ROOT_DIR = pathlib.Path(__file__).parent
 TABLE_ID_KEY = "1r24jFrWTHo5QMoG2mc32B6t7yQ32QsJcIyXuhOl1_2A"
@@ -132,7 +133,7 @@ class GTable:
 
         log.info(f'Done insert to {sh_target.title}')
 
-
+@time_counter
 def g_table_main(data):
     gt = GTable(spreadsheet_id=TABLE_ID_KEY)
     gt.add_to_sheet_vacancydata(data)

@@ -1,5 +1,6 @@
 import csv
 import logging
+import time
 from datetime import datetime
 from pprint import pprint
 from typing import List
@@ -109,3 +110,11 @@ class ImageUploader:
                 continue
 
         return files_dict
+
+def time_counter(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        res = func(*args, **kwargs)
+        logging.info(f"{func.__name__}. Time: {round(time.time() - start, 3)} s.")
+        return res
+    return wrapper
