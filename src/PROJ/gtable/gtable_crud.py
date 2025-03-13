@@ -82,6 +82,7 @@ class GTable:
         self.worksheet1.append_rows(values=[list(d.values()) for d in data],
                                     value_input_option=ValueInputOption.user_entered)
 
+    @time_counter
     def add_to_sheet_vacancydata(self, data=None, sh_target_idx=DEFAULT_WORKSHEET_INDEX):
         if not data:
             log.warning('DEV: Write test data')
