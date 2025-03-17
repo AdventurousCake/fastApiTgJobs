@@ -20,6 +20,7 @@ r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 
 @cache(expire=60)
 @r_jobs.get("/jobs_all", response_model=list[VacancyData])
+@limiter.limit("100/minute")
 async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0),
                    ordering: str = Query(None)):
     data = await JobsDataRepository.get_all(limit=limit, offset=offset)
@@ -28,12 +29,14 @@ async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)
 
 @cache(expire=60)
 @r_jobs.get("/hrs_all", response_model=list[SHr])
+@limiter.limit("100/minute")
 async def hrs_all(params=Depends(filter_params)):
     data = await HrDataRepository.get_all(**params)
     return data
 
 @cache(expire=60)
 @r_jobs.get("/search", response_model=list[VacancyData], dependencies=[Depends(current_active_user)])
+@limiter.limit("100/minute")
 async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=255)):
     async with async_session_factory() as session:
         q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%"))
@@ -42,6 +45,7 @@ async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=2
         return data
 
 @r_jobs.get("/webhook-run", dependencies=[Depends(current_active_user)])
+@limiter.limit("5/minute")
 async def webhook():
     run = asyncio.create_task(run_gtable())
     run.add_done_callback(lambda x: log.info("gtable webhook run done"))
