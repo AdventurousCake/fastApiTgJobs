@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 import itertools
 import logging
 from typing import List
@@ -151,8 +152,14 @@ class ScrapeVacancies:
 
         # unique by url
         unique_count = len(set([m.msg_url for m in all_messages_new]))
+
+        dates = [m.posted_at for m in all_messages_new]
+        lastweek_count = len([m for m in dates if m > datetime.now() - timedelta(days=7)])
+        today_count = len([m for m in dates if m > datetime.now() - timedelta(days=1)])
+
         logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}[/]')
+                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}\n'
+                       f'[yellow]Last week: {lastweek_count}; Today: {today_count}[/yellow][/]')
         # post proc
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())
