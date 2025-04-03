@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from fastapi import Query, Depends, APIRouter, status
+from fastapi import Query, Depends, APIRouter, status, Request
 from fastapi_cache.decorator import cache
 from sqlalchemy import select, text
 
@@ -21,7 +21,7 @@ r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 @cache(expire=60)
 @r_jobs.get("/jobs_all", response_model=list[VacancyData])
 @limiter.limit("100/minute")
-async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0),
+async def jobs_all(request: Request, limit: int = Query(10, ge=0), offset: int = Query(None, ge=0),
                    ordering: str = Query(None)):
     data = await JobsDataRepository.get_all(limit=limit, offset=offset)
     return data
@@ -30,14 +30,14 @@ async def jobs_all(limit: int = Query(10, ge=0), offset: int = Query(None, ge=0)
 @cache(expire=60)
 @r_jobs.get("/hrs_all", response_model=list[SHr])
 @limiter.limit("100/minute")
-async def hrs_all(params=Depends(filter_params)):
+async def hrs_all(request: Request, params=Depends(filter_params)):
     data = await HrDataRepository.get_all(**params)
     return data
 
 @cache(expire=60)
 @r_jobs.get("/search", response_model=list[VacancyData], dependencies=[Depends(current_active_user)])
 @limiter.limit("100/minute")
-async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=255)):
+async def search_vacancies(request: Request, by_text: str = Query(None, min_length=3, max_length=255)):
     async with async_session_factory() as session:
         q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%"))
         result = await session.execute(q)
@@ -64,7 +64,7 @@ async def status():
 
 @r_jobs.get("/webhook-run", dependencies=[Depends(current_active_user)])
 @limiter.limit("5/minute")
-async def webhook():
+async def webhook(request: Request):
     run = asyncio.create_task(run_gtable())
     run.add_done_callback(lambda x: log.info("gtable webhook run done"))
     return status.HTTP_200_OK
