@@ -57,12 +57,10 @@ class Jobs(Base):
     remote: Mapped[bool]
     is_bigtech: Mapped[Optional[bool]] = mapped_column(default=None)
 
-    # text_: Mapped[str] = mapped_column(String(4096), nullable=False)
     text_: Mapped[str] = mapped_column(Text, CheckConstraint('length(text_)<=4096'), nullable=False)
     md5_text: Mapped[str] = mapped_column(String(32), Computed("md5(text_)", persisted=True), nullable=False)
 
     contacts: Mapped[str] = mapped_column(String(4096), nullable=True)
-    # contacts: Mapped[str_256 | None]
     user_tg_id: Mapped[big_int]
     user_username: Mapped[str_256 | None]
     user_image_id: Mapped[str_256 | None]
@@ -73,11 +71,9 @@ class Jobs(Base):
     # chat_username: Mapped[str_256 | None] = mapped_column(Computed('msg_url'))
     views: Mapped[Optional[int]] = mapped_column(default=0)
     button_url: Mapped[str_256 | None]
-
     user_tg_id: Mapped[big_int | None] = mapped_column(ForeignKey("hr.id", ondelete="CASCADE"))
     hr = relationship("HR", back_populates="jobs", lazy="joined")  # cascade="all, delete") # use_list=True
     # hr: Mapped['HR'] = relationship(back_populates="jobs")
-
     is_new: Mapped[bool] = mapped_column(default=True)  # according .clean_isnew()
     posted_at: Mapped[date_default_none]
     parsed_at: Mapped[date_default_now]

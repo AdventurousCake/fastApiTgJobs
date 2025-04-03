@@ -12,7 +12,7 @@ async def run_gtable():
     await asyncio.to_thread(g_table_main, data)
     # tr1 = threading.Thread(target=g_table_main, args=(data,), name="gtable_thread").start()
 
-    logging.warning("Saving to google sheets...")
+    logging.warning("Saved to google sheets")
 
 if __name__ == "__main__":
     asyncio.run(run_gtable())

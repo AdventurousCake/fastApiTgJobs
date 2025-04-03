@@ -38,7 +38,6 @@ class MessageParser:
             return None
         remote = True if vacancy_filter.is_remote(text_low) else False
         startup = True if vacancy_filter.is_startup(text_low) else False
-
         is_bigtech = vacancy_filter.is_bigtech(text_low)
 
         contacts = self.extract_contacts(text_low)
@@ -55,7 +54,6 @@ class MessageParser:
         chat_id = message.chat.id
 
         # tags = self.extract_tags(text_low)
-        # print(tags)
 
         # clean #tags
         text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+

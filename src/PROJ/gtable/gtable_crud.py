@@ -10,10 +10,11 @@ from rich.logging import RichHandler
 
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import GOOGLE_CREDENTIALS_JSON
+from src.PROJ.core.utils import time_counter
 
 ROOT_DIR = pathlib.Path(__file__).parent
 TABLE_ID_KEY = "1r24jFrWTHo5QMoG2mc32B6t7yQ32QsJcIyXuhOl1_2A"
-DEFAULT_WORKSHEET_INDEX = 3  # from zero
+DEFAULT_WORKSHEET_INDEX = 1  # from zero
 DEFAULT_WORKSHEET_NAME = 'PROD'
 FROZEN_HEADER_ROWS = 3
 
@@ -81,19 +82,20 @@ class GTable:
         self.worksheet1.append_rows(values=[list(d.values()) for d in data],
                                     value_input_option=ValueInputOption.user_entered)
 
+    @time_counter
     def add_to_sheet_vacancydata(self, data=None, sh_target_idx=DEFAULT_WORKSHEET_INDEX):
         if not data:
             log.warning('DEV: Write test data')
             raise NotImplementedError
 
-        # v0502; noinspection PySetFunctionToLiteral
-        include_values = set(['level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username',
-                              'posted_at', 'user_image_url'])
-        log.info(f'Размерность include (len {len(include_values)}): A:{chr(len(include_values) + 96)}')
+        # v0502
+        include_values_set = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at',
+                          'user_image_url'}
+        log.info(f'Размерность include (len {len(include_values_set)}): A:{chr(len(include_values_set) + 96)}')
 
         # check first item
         if isinstance(data[0], VacancyData):
-            data = [data_item.model_dump(mode='json', include=include_values) for data_item in data]
+            data = [data_item.model_dump(mode='json', include=include_values_set) for data_item in data]
         else:
             raise ValueError('data must be list of VacancyData')
 
@@ -116,7 +118,7 @@ class GTable:
 
         target_row = 1
 
-        log_data = (f'[yellow] TABLE INFO:\n'
+        log_data = (f'[cyan] TABLE INFO:\n'
                     f'{pformat(self.get_info())}\n'
                     f'{sh_target.column_count=}, {sh_target.row_count=}\n'
                     f'{sh_target.frozen_row_count=}, {sh_target.frozen_col_count=}\n'
@@ -132,7 +134,7 @@ class GTable:
 
         log.info(f'Done insert to {sh_target.title}')
 
-
+@time_counter
 def g_table_main(data):
     gt = GTable(spreadsheet_id=TABLE_ID_KEY)
     gt.add_to_sheet_vacancydata(data)

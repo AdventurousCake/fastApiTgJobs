@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -28,7 +28,6 @@ DB_PASS = os.getenv("DB_PASS", "postgres")
 MODE = os.getenv("MODE")
 if MODE == "DOCKER":
     DB_HOST = os.getenv("DB_HOST", "pg")
-
 else:
     DB_HOST = os.getenv("DB_HOST", "localhost")
 
