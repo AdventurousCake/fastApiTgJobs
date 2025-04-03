@@ -41,6 +41,24 @@ async def search_vacancies(by_text: str = Query(None, min_length=3, max_length=2
         data = result.unique().scalars().all()
         return data
 
+@r_jobs.get('/status')
+async def status():
+    return status.HTTP_200_OK
+
+@r_jobs.get('/robots.txt')
+async def status():
+    return "User-agent: *\nDisallow: /"
+
+# @r_jobs.get('/hr/{hr_id}', response_model=SHr)
+# async def hr_by_id(hr_id: int, params=Depends(filter_params)):
+#     data = await HrDataRepository.get_by_id(hr_id, **params)
+#     return data
+
+# @r_jobs.get('/job/{job_id}', response_model=VacancyData)
+# async def job_by_id(job_id: int, params=Depends(filter_params)):
+#     data = await JobsDataRepository.get_by_id(job_id, **params)
+#     return data
+
 @r_jobs.get("/webhook-run", dependencies=[Depends(current_active_user)])
 async def webhook():
     run = asyncio.create_task(run_gtable())

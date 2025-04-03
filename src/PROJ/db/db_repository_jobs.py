@@ -41,7 +41,7 @@ class JobsDataRepository:
     async def get_all(cls, limit: int = 100, offset: int = None, **filter_by) -> list[Jobs]:
         async with async_session_factory() as session:
             q = select(Jobs).filter_by(**filter_by).limit(limit).offset(offset)
-            print(q.compile(compile_kwargs={"literal_binds": True}))
+            # print(q.compile(compile_kwargs={"literal_binds": True}))
 
             result = await session.execute(q)
             return result.unique().scalars().all()
@@ -93,7 +93,6 @@ class JobsDataRepository:
                 constraint argument is used to specify an index directly rather than inferring it.
                 This can be the name of a UNIQUE constraint, a PRIMARY KEY constraint, or an INDEX:"""
 
-                # text_
                 q = q.on_conflict_do_update(
                     # constraint='idx_uniq_id_text', set_=dict(text_=q.excluded.text_)
                     # index_elements=('id', 'text_'), set_=dict(text_=q.excluded.text_) # dw
@@ -158,8 +157,8 @@ class JobsDataRepository:
     @classmethod
     async def clean_isnew_flag(cls):
         """new_data = {"is_new": True}"""
+        
         async with async_session_factory() as session:
-            q = await session.execute(update(Jobs).where(Jobs.is_new == True)
-                                      .values(is_new=False).returning(Jobs.id))
+            q = await session.execute(update(Jobs).where(Jobs.is_new == True).values(is_new=False).returning(Jobs.id))
             await session.commit()
             return q.scalars().all()
