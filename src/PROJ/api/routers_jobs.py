@@ -45,11 +45,11 @@ async def search_vacancies(request: Request, by_text: str = Query(None, min_leng
         return data
 
 @r_jobs.get('/status')
-async def status():
+async def status_():
     return status.HTTP_200_OK
 
 @r_jobs.get('/robots.txt')
-async def status():
+async def robots():
     return "User-agent: *\nDisallow: /"
 
 # @r_jobs.get('/hr/{hr_id}', response_model=SHr)
