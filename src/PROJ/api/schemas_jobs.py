@@ -33,10 +33,6 @@ class VacancyData(BaseModel):
     def msg_url_fmt(self, msg_url) -> str:
         return f'=HYPERLINK("{msg_url}", "LINK")'
 
-    # @field_serializer('deeplink_PROP', when_used='json')
-    # def msg_url_fmt(self, value) -> str:
-    #     return f'=HYPERLINK("{value}", "TG LINK")'
-
     @field_serializer('user_image_url', when_used='json')
     def user_image_url_fmt(self, user_image_url) -> str:
         if user_image_url:

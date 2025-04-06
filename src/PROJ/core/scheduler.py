@@ -9,9 +9,7 @@ def schedule_jobs():
     log.warning('add tasks for scheduler ONLY first_run')
     # scheduler.add_job(run, id="first_run")  # first run
     # scheduler.add_job(run, "interval", seconds=3600, id="my_job_id")
-
-    scheduler.add_job(run, "cron", day_of_week="mon-sun", hour="7-20", minute="0", id="parse_hourly")
-    # scheduler.add_job(run, "cron", day_of_week="mon-sun", hour="7-20", minute="0,30", id="parse_daily")
+    # scheduler.add_job(run, "cron", day_of_week="mon-sun", hour="7-20", minute="0", id="parse_hourly") #"0,30"
 
 def start_scheduler():
     scheduler.start()

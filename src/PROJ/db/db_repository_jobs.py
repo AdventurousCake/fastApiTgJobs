@@ -41,7 +41,6 @@ class JobsDataRepository:
     async def get_all(cls, limit: int = 100, offset: int = None, **filter_by) -> list[Jobs]:
         async with async_session_factory() as session:
             q = select(Jobs).filter_by(**filter_by).limit(limit).offset(offset)
-            # print(q.compile(compile_kwargs={"literal_binds": True}))
 
             result = await session.execute(q)
             return result.unique().scalars().all()
@@ -101,7 +100,6 @@ class JobsDataRepository:
                     ),
                 ).returning(Jobs.id)
 
-                # print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
 
                 ids = res.scalars().all()
@@ -135,7 +133,6 @@ class JobsDataRepository:
 
                 # print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
-
                 ids = res.scalars().all()
 
                 await session.flush()
@@ -144,7 +141,6 @@ class JobsDataRepository:
 
             except Exception as e:
                 await session.rollback()
-
                 # logging.debug("error", exc_info=True, extra={'locals': locals()})
                 raise e
 
