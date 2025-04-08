@@ -24,17 +24,14 @@ else:
     DB_HOST = os.getenv("DB_HOST", "localhost")
 
 # for testing
-TEST_DB_HOST = os.getenv("TEST_DB_HOST")
-TEST_DB_PORT = os.getenv("TEST_DB_PORT")
-TEST_DB_NAME = os.getenv("TEST_DB_NAME")
-TEST_DB_USER = os.getenv("TEST_DB_USER")
-TEST_DB_PASS = os.getenv("TEST_DB_PASS")
-TEST_DB_URL = os.getenv("TEST_DB_URL")  # or full
+TEST_DB_HOST = os.getenv("TEST_DB_HOST", "localhost")
+TEST_DB_PORT = os.getenv("TEST_DB_PORT", "5432")
+TEST_DB_NAME = os.getenv("TEST_DB_NAME", "postgres")
+TEST_DB_USER = os.getenv("TEST_DB_USER", "postgres")
+TEST_DB_PASS = os.getenv("TEST_DB_PASS", "postgres")
+TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}" #os.getenv("TEST_DB_URL")  # or full
 
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-if TEST_DB_HOST:
-    TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
-# else:
 #     # Using env
 #     assert "+asyncpg" in TEST_DB_URL
 
