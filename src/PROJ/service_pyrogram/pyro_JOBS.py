@@ -12,13 +12,6 @@ from src.PROJ.core.config import TG_SESSION_STRING, MSG_LIMIT, MSG_MIN_DATE, PAS
 from src.PROJ.core.utils import ImageUploader, time_counter
 from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
-# logging.basicConfig(
-#     level="INFO",
-#     format="%(message)s",
-#     datefmt="[%X]",
-#     handlers=[RichHandler(rich_tracebacks=True, console=console)],)
-# logger = logging.getLogger("rich")
-
 logger = logging.getLogger(__name__)
 
 
