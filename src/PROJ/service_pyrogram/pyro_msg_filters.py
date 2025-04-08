@@ -20,8 +20,7 @@ class VacancyFilter:
     # bool(VACANCY_PATTERN.search(text))
 
     # TUPLES ONLY
-    SENIOR_KEYS = ("#lead", "senior", "#teamlead ",
-                   "team lead", "#techlead", "#qa")
+    SENIOR_KEYS = ("#lead", "senior", "#teamlead", "team lead", "#techlead", "#c++")
     SENIOR_KEYS_EXCLUDE = ("middle", "junior")
     REMOTE_KEYS = ("#удаленка", "#remote", "#удаленно")
     STARTUP_KEYS = ("стартап", "startup")
@@ -31,12 +30,12 @@ class VacancyFilter:
     OFFICE_KEYS = ("#офис",)
 
     @staticmethod
-    def is_simple_filter(text, keys) -> bool:
+    def simple_filter(text, keys) -> bool:
         return any(key in text for key in keys)
 
     @staticmethod
     def is_bigtech(text):
-        return VacancyFilter.is_simple_filter(text, VacancyFilter.BIGTECH_RU_KEYS)
+        return VacancyFilter.simple_filter(text, VacancyFilter.BIGTECH_RU_KEYS)
 
     @staticmethod
     def is_vacancy(text: str, chat_username: str) -> bool:
@@ -50,8 +49,7 @@ class VacancyFilter:
         if (any(key in text
                 for key in VacancyFilter.SENIOR_KEYS)
 
-                and not any(key in text
-                            for key in VacancyFilter.SENIOR_KEYS_EXCLUDE)):
+                and not any(key in text for key in VacancyFilter.SENIOR_KEYS_EXCLUDE)):
             return True
 
     @staticmethod

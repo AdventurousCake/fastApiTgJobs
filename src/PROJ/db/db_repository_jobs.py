@@ -41,7 +41,6 @@ class JobsDataRepository:
     async def get_all(cls, limit: int = 100, offset: int = None, **filter_by) -> list[Jobs]:
         async with async_session_factory() as session:
             q = select(Jobs).filter_by(**filter_by).limit(limit).offset(offset)
-            print(q.compile(compile_kwargs={"literal_binds": True}))
 
             result = await session.execute(q)
             return result.unique().scalars().all()
@@ -77,30 +76,23 @@ class JobsDataRepository:
         """if list: значения должны быть однородными, кол-во полей одинаковое"""
         async with async_session_factory() as session:
             try:
-                # session.add(jobs)
-
                 if isinstance(data, list):
                     q = insert(Jobs).values(data)
                 elif isinstance(data, dict):
                     q = insert(Jobs).values(**data)
                 else:
-                    raise ValueError(
-                        "Data must be either a list of dictionaries or a single dictionary"
-                    )
+                    raise ValueError("Data must be either a list of dictionaries or a single dictionary")
 
                 """
                 https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#specifying-the-target
                 constraint argument is used to specify an index directly rather than inferring it.
                 This can be the name of a UNIQUE constraint, a PRIMARY KEY constraint, or an INDEX:"""
 
-                # text_
                 q = q.on_conflict_do_update(
-                    # constraint='idx_uniq_id_text', set_=dict(text_=q.excluded.text_)
-                    # index_elements=('id', 'text_'), set_=dict(text_=q.excluded.text_) # dw
                     # index_elements=('id',), set_=dict(text_=q.excluded.text_)
                     # constraint='jobs_pkey',
+                    constraint='idx_uniq_link_text',
 
-                    index_elements=("msg_url", "text_"),  # Уникальность по msg_url и text_
                     set_=dict(
                         text_=q.excluded.text_,
                         updated_at=text("TIMEZONE('utc', now())"),
@@ -108,7 +100,6 @@ class JobsDataRepository:
                     ),
                 ).returning(Jobs.id)
 
-                print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
 
                 ids = res.scalars().all()
@@ -138,14 +129,10 @@ class JobsDataRepository:
                 constraint argument is used to specify an index directly rather than inferring it.
                 This can be the name of a UNIQUE constraint, a PRIMARY KEY constraint, or an INDEX:"""
 
-                # text_
-                q = q.on_conflict_do_nothing(
-                    index_elements=("msg_url", "text_"),  # v2
-                ).returning(Jobs.id)
+                q = q.on_conflict_do_nothing(constraint='idx_uniq_link_text').returning(Jobs.id)
 
-                print("\n", q.compile(compile_kwargs={"literal_binds": True}))
+                # print("\n", q.compile(compile_kwargs={"literal_binds": True}))
                 res = await session.execute(q)
-
                 ids = res.scalars().all()
 
                 await session.flush()
@@ -154,15 +141,14 @@ class JobsDataRepository:
 
             except Exception as e:
                 await session.rollback()
-
                 # logging.debug("error", exc_info=True, extra={'locals': locals()})
                 raise e
 
     @classmethod
     async def clean_isnew_flag(cls):
+        """new_data = {"is_new": True}"""
+        
         async with async_session_factory() as session:
-            # new_data = {"is_new": True}
-            q = await session.execute(update(Jobs).where(Jobs.is_new == True)
-                                      .values(is_new=False).returning(Jobs.id))
+            q = await session.execute(update(Jobs).where(Jobs.is_new == True).values(is_new=False).returning(Jobs.id))
             await session.commit()
             return q.scalars().all()

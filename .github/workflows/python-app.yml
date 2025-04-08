@@ -19,6 +19,22 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.12
@@ -38,7 +54,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       env: 
-        TEST_DB_URL: ${{ secrets.TEST_DB_URL }}
+        #TEST_DB_URL: ${{ secrets.TEST_DB_URL }}
         MODE: TEST
       run: |
         pytest

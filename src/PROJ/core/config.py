@@ -1,17 +1,9 @@
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from dotenv import load_dotenv, find_dotenv
 import os
-
-# class Settings(BaseSettings):
-#     app_title: str = 'app'
-#     database_url: str
-#     secret: str = 'SECRET'
-#     class Config:
-#         env_file = '.env'
-# settings = Settings() 
 
 # load from .env; относительно config.py
 env_file = find_dotenv(".env")
@@ -28,24 +20,20 @@ DB_PASS = os.getenv("DB_PASS", "postgres")
 MODE = os.getenv("MODE")
 if MODE == "DOCKER":
     DB_HOST = os.getenv("DB_HOST", "pg")
-
 else:
     DB_HOST = os.getenv("DB_HOST", "localhost")
 
 # for testing
-TEST_DB_HOST = os.getenv("TEST_DB_HOST")
-TEST_DB_PORT = os.getenv("TEST_DB_PORT")
-TEST_DB_NAME = os.getenv("TEST_DB_NAME")
-TEST_DB_USER = os.getenv("TEST_DB_USER")
-TEST_DB_PASS = os.getenv("TEST_DB_PASS")
-TEST_DB_URL = os.getenv("TEST_DB_URL")  # or full
+TEST_DB_HOST = os.getenv("TEST_DB_HOST", "localhost")
+TEST_DB_PORT = os.getenv("TEST_DB_PORT", "5432")
+TEST_DB_NAME = os.getenv("TEST_DB_NAME", "postgres")
+TEST_DB_USER = os.getenv("TEST_DB_USER", "postgres")
+TEST_DB_PASS = os.getenv("TEST_DB_PASS", "postgres")
+TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}" #os.getenv("TEST_DB_URL")  # or full
 
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-if TEST_DB_HOST:
-    TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
-else:
-    # Using env
-    assert "+asyncpg" in TEST_DB_URL
+#     # Using env
+#     assert "+asyncpg" in TEST_DB_URL
 
 # JWT
 JWT_KEY = os.getenv("JWT_KEY")

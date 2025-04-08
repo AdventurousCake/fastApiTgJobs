@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 import itertools
 import logging
 from typing import List
@@ -8,15 +9,8 @@ from pyrogram import Client
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import TG_SESSION_STRING, MSG_LIMIT, MSG_MIN_DATE, PASS_SENIORS_TMP, \
     TASK_EXECUTION_TIME_LIMIT, UNIQUE_FILTER, TARGET_CHATS, TARGET_CHATS_TEST, IMG_SAVE
-from src.PROJ.core.utils import ImageUploader
+from src.PROJ.core.utils import ImageUploader, time_counter
 from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
-
-# logging.basicConfig(
-#     level="INFO",
-#     format="%(message)s",
-#     datefmt="[%X]",
-#     handlers=[RichHandler(rich_tracebacks=True, console=console)],)
-# logger = logging.getLogger("rich")
 
 logger = logging.getLogger(__name__)
 
@@ -86,22 +80,22 @@ class ScrapeVacancies:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 
         logger.warning(
-            f"""Starting job search.
-            USING ENV KEY TG SESSION
-            TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;
-            { MSG_LIMIT=};
-            MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}
-            { UNIQUE_FILTER=}
-            { IMG_SAVE=}
-            ======================================
-            PASS seniors (temporary): {PASS_SENIORS_TMP}
-            Target chats ({len(self.target_chats)}): {self.target_chats}
-            ======================================"""
+            f"Starting job search.\n"
+            f"USING ENV KEY TG SESSION\n"
+            f"TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;\n"
+            f"{ MSG_LIMIT=};\n"
+            f"MSG MIN DATE: {MSG_MIN_DATE.strftime('%Y-%m-%d')}\n"
+            f"{ UNIQUE_FILTER=}\n"
+            f"{ IMG_SAVE=}\n"
+            f"======================================\n"
+            f"PASS seniors (temporary): {PASS_SENIORS_TMP}\n"
+            f"Target chats ({len(self.target_chats)}): {self.target_chats}\n"
+            f"======================================"
         )
 
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             c_data = await client.client.get_me()
-            logger.warning(f"Bot id: {c_data.id}; Name: {c_data.first_name}")
+            logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}")
 
             # list of coroutines
             tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),
@@ -151,8 +145,14 @@ class ScrapeVacancies:
 
         # unique by url
         unique_count = len(set([m.msg_url for m in all_messages_new]))
+
+        dates = [m.posted_at for m in all_messages_new]
+        lastweek_count = len([m for m in dates if m > datetime.now() - timedelta(days=7)])
+        today_count = len([m for m in dates if m > datetime.now() - timedelta(days=1)])
+
         logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}[/]')
+                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}\n'
+                       f'[yellow]Last week: {lastweek_count}; Today: {today_count}[/yellow][/]')
         # post proc
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())

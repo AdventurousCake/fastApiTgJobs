@@ -34,9 +34,8 @@ async def on_startup():
     log.warning('[bold red]create superuser admin@admin.com[/]', extra={"markup": True})
     await create_user(email='admin@admin.com', username='admin', password='admin', is_superuser=True)
 
-    log.warning('[bold red]starting scheduler[/]', extra={"markup": True})
-
     # init scheduler
+    log.warning('[bold red]starting scheduler[/]', extra={"markup": True})
     schedule_jobs()
     start_scheduler()
 
@@ -75,11 +74,11 @@ def create_app(create_custom_static_urls: bool = False) -> FastAPI:
 
     origins: list[AnyHttpUrl] = [
         "http://localhost:8000",
-        "https://myfastapi7.ddns.net",
     ]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        # allow_origins=origins,
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
         allow_headers=[

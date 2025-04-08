@@ -37,11 +37,7 @@ router_users.include_router(
 
 
 # method override
-@router_users.delete(
-    '/users/{id}',
-    tags=['users'],
-    deprecated=True
-)
+@router_users.delete('/users/{id}', tags=['users'], deprecated=True)
 def delete_user(id: str):
     """Deactivate users instead of delete"""
     raise HTTPException(
