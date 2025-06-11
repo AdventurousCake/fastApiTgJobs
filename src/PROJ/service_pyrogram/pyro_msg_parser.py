@@ -59,6 +59,10 @@ class MessageParser:
         text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
         text_cleaned = text_cleaned.lstrip()
 
+        # clean ad
+        ad_str = """⬇️ Другие каналы IT-вакансий: \n@best_itjob \n@it_rab"""
+        text_cleaned.replace(ad_str, "")
+
         try:
             v_data = VacancyData(
                 level=level,
