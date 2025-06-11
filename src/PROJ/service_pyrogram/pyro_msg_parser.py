@@ -61,7 +61,7 @@ class MessageParser:
 
         # clean ad
         ad_str = """⬇️ Другие каналы IT-вакансий: \n@best_itjob \n@it_rab"""
-        text_cleaned.replace(ad_str, "")
+        text_cleaned =text_cleaned.replace(ad_str, "")
 
         try:
             v_data = VacancyData(
