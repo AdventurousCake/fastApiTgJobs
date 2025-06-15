@@ -24,12 +24,15 @@ class MessageParser:
         if MsgFilter().is_ads_and_img(message):
             return None
 
-        # MAIN
+        # processing
         text = message.text
         text_low = text.lower()
 
         vacancy_filter = VacancyFilter()
         if not vacancy_filter.is_vacancy(text_low, chat_username):
+            return None
+
+        if vacancy_filter.is_ads(text_low):
             return None
 
         # bool

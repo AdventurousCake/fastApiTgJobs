@@ -59,3 +59,7 @@ class VacancyFilter:
     @staticmethod
     def is_startup(text):
         return any(key in text for key in VacancyFilter.STARTUP_KEYS)
+
+    @staticmethod
+    def is_ads(text):
+        return bool(re.search(r't\.me/addlist/', text))
