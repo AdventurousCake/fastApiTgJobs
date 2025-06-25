@@ -80,7 +80,7 @@ class ScrapeVacancies:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 
         logger.warning(
-            f"Starting job search.\n"
+            f"▶ Starting job search\n"
             f"USING ENV KEY TG SESSION\n"
             f"TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;\n"
             f"{ MSG_LIMIT=};\n"
@@ -150,14 +150,19 @@ class ScrapeVacancies:
         lastweek_count = len([m for m in dates if m > datetime.now() - timedelta(days=7)])
         today_count = len([m for m in dates if m > datetime.now() - timedelta(days=1)])
 
-        logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}\n'
-                       f'[yellow]Last week: {lastweek_count}; Today: {today_count}[/yellow][/]')
-        # post proc
+        # post proc, special filter
+        seniors_data = [m for m in all_messages_new if m.level == False]
+
+        # todo
+        # all_messages_new = [m for m in all_messages_new if m.level == True]
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())
 
-        return dict(all_messages=all_messages_new, hr_data=hr_data)
+        logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
+                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}\n'
+                       f'[yellow]Last week: {lastweek_count}; Today: {today_count}[/yellow][/]')
+
+        return dict(all_messages=all_messages_new, hr_data=hr_data, seniors_data=seniors_data)
 
 
 if __name__ == "__main__":

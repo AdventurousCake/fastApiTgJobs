@@ -34,8 +34,10 @@ class MessageParser:
 
         # bool
         level = False if vacancy_filter.is_senior_position(text_low) else True
-        if PASS_SENIORS_TMP and level == False:
-            return None
+        # special filter
+        # if PASS_SENIORS_TMP and level == False:
+        #     return None
+
         remote = True if vacancy_filter.is_remote(text_low) else False
         startup = True if vacancy_filter.is_startup(text_low) else False
         is_bigtech = vacancy_filter.is_bigtech(text_low)
