@@ -20,7 +20,7 @@ class VacancyFilter:
     # bool(VACANCY_PATTERN.search(text))
 
     # TUPLES ONLY
-    SENIOR_KEYS = ("#lead", "senior", "#teamlead", "team lead", "#techlead", "#c++")
+    SENIOR_KEYS = ("#lead", "senior", "#teamlead", "team lead", "#techlead", "technical lead", "#c++")
     SENIOR_KEYS_EXCLUDE = ("middle", "junior")
     REMOTE_KEYS = ("#удаленка", "#remote", "#удаленно")
     STARTUP_KEYS = ("стартап", "startup")
@@ -59,3 +59,7 @@ class VacancyFilter:
     @staticmethod
     def is_startup(text):
         return any(key in text for key in VacancyFilter.STARTUP_KEYS)
+
+    @staticmethod
+    def is_ads(text):
+        return bool(re.search(r't\.me/addlist/', text))

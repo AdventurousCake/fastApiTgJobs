@@ -24,12 +24,15 @@ class MessageParser:
         if MsgFilter().is_ads_and_img(message):
             return None
 
-        # MAIN
+        # processing
         text = message.text
         text_low = text.lower()
 
         vacancy_filter = VacancyFilter()
         if not vacancy_filter.is_vacancy(text_low, chat_username):
+            return None
+
+        if vacancy_filter.is_ads(text_low):
             return None
 
         # bool
@@ -60,6 +63,10 @@ class MessageParser:
         # clean #tags
         text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
         text_cleaned = text_cleaned.lstrip()
+
+        # clean ad
+        ad_str = """⬇️ Другие каналы IT-вакансий: \n@best_itjob \n@it_rab"""
+        text_cleaned =text_cleaned.replace(ad_str, "")
 
         try:
             v_data = VacancyData(

@@ -62,8 +62,8 @@ async def robots():
 #     data = await JobsDataRepository.get_by_id(job_id, **params)
 #     return data
 
-@r_jobs.get("/webhook-run", dependencies=[Depends(current_active_user)])
-@limiter.limit("5/minute")
+@r_jobs.get("/webhook-run")  # dependencies=[Depends(current_active_user)]
+@limiter.limit("1/minute")
 async def webhook(request: Request):
     run = asyncio.create_task(run_gtable())
     run.add_done_callback(lambda x: log.info("gtable webhook run done"))
