@@ -4,6 +4,7 @@ import logging
 from fastapi import Query, Depends, APIRouter, status, Request
 from fastapi_cache.decorator import cache
 from sqlalchemy import select, text
+from fastapi.responses import HTMLResponse
 
 from src.PROJ.api.schemas_jobs import SHr, VacancyData
 from src.PROJ.core.db import async_session_factory
@@ -67,6 +68,25 @@ async def robots():
 async def webhook(request: Request):
     run = asyncio.create_task(run_gtable())
     run.add_done_callback(lambda x: log.info("gtable webhook run done"))
-    return status.HTTP_200_OK
+
+    url_ = "https://docs.google.com/spreadsheets/d/1r24jFrWTHo5QMoG2mc32B6t7yQ32QsJcIyXuhOl1_2A/preview"
+    return HTMLResponse(
+        f"""
+        <!doctype html>
+        <html>
+        <head>
+            <meta http-equiv="refresh" content="5;url={url_}">
+            <script>
+                setTimeout(function(){{ window.location.href = '{url_}'; }}, 5000);
+            </script>
+            <title>Redirecting...</title>
+        </head>
+        <body>
+            <p>Redirecting to <a href="{url_}">{url_}</a> in 5 seconds.</p>
+        </body>
+        </html>
+        """,
+        media_type="text/html",
+    )
 
 # tst endpoints shelf
