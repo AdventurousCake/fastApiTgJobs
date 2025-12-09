@@ -40,7 +40,7 @@ async def hrs_all(request: Request, params=Depends(filter_params)):
 @limiter.limit("100/minute")
 async def search_vacancies(request: Request, by_text: str = Query(None, min_length=3, max_length=255)):
     async with async_session_factory() as session:
-        q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%"))
+        q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%")).limit(100)
         result = await session.execute(q)
         data = result.unique().scalars().all()
         return data
@@ -75,14 +75,14 @@ async def webhook(request: Request):
         <!doctype html>
         <html>
         <head>
-            <meta http-equiv="refresh" content="5;url={url_}">
+            <meta http-equiv="refresh" content="10;url={url_}">
             <script>
-                setTimeout(function(){{ window.location.href = '{url_}'; }}, 5000);
+                setTimeout(function(){{ window.location.href = '{url_}'; }}, 10000);
             </script>
             <title>Redirecting...</title>
         </head>
         <body>
-            <p>Redirecting to <a href="{url_}">{url_}</a> in 5 seconds.</p>
+            <p>Redirecting to <a href="{url_}">{url_}</a> in 10 seconds.</p>
         </body>
         </html>
         """,
