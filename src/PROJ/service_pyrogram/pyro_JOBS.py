@@ -117,8 +117,8 @@ class ScrapeVacancies:
         errors = []
 
         for idx, result in enumerate(chat_results):
-            logger.info(f"Chat {self.target_chats[idx]}: {len(result)}")
 
+            # errors proc
             if isinstance(result, Exception):
                 if isinstance(result, asyncio.CancelledError):
                     logger.error(f"asyncio.CancelledError in TASK get_chat_data", exc_info=result)
@@ -130,6 +130,8 @@ class ScrapeVacancies:
 
             # good result
             else:
+                logger.warning(f"Chat {self.target_chats[idx]}: {len(result)}")
+
                 for message in result:
                     # check if channel
                     user_tg_id = message.user_tg_id
