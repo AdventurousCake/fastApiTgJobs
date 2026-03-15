@@ -43,8 +43,8 @@ class TelegramClient:
 
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
-        chat_data = await self.client.get_chat(chat_id)
-        logger.info(f"""Processing chat: {chat_data.title} - @{chat_data.username}""")
+        chat_info = await self.client.get_chat(chat_id)
+        logger.info(f"""Processing chat: {chat_info.title} - @{chat_info.username}""")
 
         messages: List[VacancyData] = []
         messages_set_text_255 = []  # for check unique
@@ -54,7 +54,7 @@ class TelegramClient:
             if message.date < MSG_MIN_DATE:
                 continue
 
-            parsed_message = await MessageParser().parse_message(message, chat_data.username)
+            parsed_message = await MessageParser().parse_message(message, chat_info.username)
             if parsed_message:
                 # check unique
                 if UNIQUE_FILTER:
@@ -93,6 +93,7 @@ class ScrapeVacancies:
             f"======================================"
         )
 
+        # getting data from tg
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             c_data = await client.client.get_me()
             logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}")
@@ -116,6 +117,7 @@ class ScrapeVacancies:
         hrs = {}
         errors = []
 
+        # iterate by chats
         for idx, result in enumerate(chat_results):
 
             # errors proc
