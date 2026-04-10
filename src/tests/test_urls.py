@@ -2,9 +2,8 @@ import pytest
 
 # ROUTER_PREFIX = ''
 
-# values_for_test = ["/jobs/hrs_all", "/jobs/jobs_all", "/jobs/search", "/docs"]
-values_for_test = ["/jobs/hrs_all", "/jobs/jobs_all", "/docs"]
-@pytest.mark.parametrize("url", values_for_test)  # indirect=True
+urls_for_test = ["/jobs/hrs_all", "/jobs/jobs_all", "/docs"]
+@pytest.mark.parametrize("url", urls_for_test)  # indirect=True
 async def test_urls(ac, url):
     # await init_fake_data(limit=10)
 
