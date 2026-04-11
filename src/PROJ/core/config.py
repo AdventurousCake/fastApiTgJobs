@@ -10,6 +10,7 @@ env_file = find_dotenv(".env")
 env = load_dotenv(env_file)
 if not env:
     logging.critical("No .env file")
+logging.warning(f"{env_file=}")
 
 
 DB_PORT = os.getenv("DB_PORT", "5432")
