@@ -4,8 +4,7 @@ import random
 from typing import AsyncGenerator
 
 import pytest
-from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
@@ -15,7 +14,10 @@ from src.PROJ.core.config import TEST_DB_URL
 from src.PROJ.api.app import app
 from src.PROJ.core.db import Base, get_async_session
 from src.PROJ.users.user_models import User
-from src.tests.gen_test_data import init_fake_data
+
+# only sync
+# from fastapi.testclient import TestClient
+# client = TestClient(app)
 
 logging.warning(f"TEST_DB_URL: {TEST_DB_URL}")
 engine_test = create_async_engine(TEST_DB_URL, poolclass=NullPool)
@@ -24,6 +26,7 @@ async_session_maker = sessionmaker(engine_test, class_=AsyncSession, expire_on_c
 async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
+        # await session.rollback() # откат изменений
 
 app.dependency_overrides[get_async_session] = override_get_async_session
 
@@ -59,7 +62,6 @@ async def create_test_users(session: AsyncSession):
             email=user_data["email"],
             username=user_data["username"],
             hashed_password=get_password_hash(user_data["password"]),
-            # hashed_password="EXAMPLE",
             is_superuser=user_data["is_superuser"],
             # role_id=user_data["role_id"]
         )
@@ -88,6 +90,8 @@ async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
+    await engine_test.dispose()
+
 # @pytest.fixture(scope='session')
 # async def generate_fake_data():
 #     await init_fake_data(limit=10)
@@ -100,12 +104,11 @@ def event_loop(request):
     yield loop
     loop.close()
 
-test_client = TestClient(app)
 
 @pytest.fixture(scope="function")
 async def ac() -> AsyncGenerator[AsyncClient, None]:
     """async client fixture"""
-    async with AsyncClient(app=app, base_url="http://test_base") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test_base") as ac:
         yield ac
 
 # authorized_client
