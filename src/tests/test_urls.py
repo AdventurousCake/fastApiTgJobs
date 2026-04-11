@@ -1,7 +1,5 @@
 import pytest
 
-from src.tests.conftest import client
-
 # ROUTER_PREFIX = ''
 
 urls_for_test = ["/jobs/hrs_all", "/jobs/jobs_all", "/docs"]

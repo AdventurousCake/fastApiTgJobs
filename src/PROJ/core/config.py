@@ -1,12 +1,12 @@
 import json
 import logging
 from datetime import datetime, timedelta, UTC
+from pathlib import Path
 
 from dotenv import load_dotenv, find_dotenv
 import os
 
-# load from .env; относительно config.py
-env_file = find_dotenv(".env")
+env_file = Path(__file__).resolve().parent.parent / '.env'
 env = load_dotenv(env_file)
 if not env:
     logging.critical("No .env file")
