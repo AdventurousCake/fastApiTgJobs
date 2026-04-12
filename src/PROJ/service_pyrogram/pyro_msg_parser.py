@@ -24,7 +24,7 @@ class MessageParser:
         if MsgFilter().is_ads_and_img(message):
             return None
 
-        # MAIN
+        # processing
         text = message.text
         text_low = text.lower()
 
@@ -32,10 +32,15 @@ class MessageParser:
         if not vacancy_filter.is_vacancy(text_low, chat_username):
             return None
 
+        if vacancy_filter.is_ads(text_low):
+            return None
+
         # bool
         level = False if vacancy_filter.is_senior_position(text_low) else True
-        if PASS_SENIORS_TMP and level == False:
-            return None
+        # special filter
+        # if PASS_SENIORS_TMP and level == False:
+        #     return None
+
         remote = True if vacancy_filter.is_remote(text_low) else False
         startup = True if vacancy_filter.is_startup(text_low) else False
         is_bigtech = vacancy_filter.is_bigtech(text_low)
@@ -58,6 +63,10 @@ class MessageParser:
         # clean #tags
         text_cleaned = re.sub(pattern=r'#[\wа-яА-ЯёЁ+]+', repl='', string=text)  # #\w+
         text_cleaned = text_cleaned.lstrip()
+
+        # clean ad
+        ad_str = """Python Job 💬 в Telegram | 💙 в VK | 💬 в Max"""
+        text_cleaned = text_cleaned.replace(ad_str, "")
 
         try:
             v_data = VacancyData(

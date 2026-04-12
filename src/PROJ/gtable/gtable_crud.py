@@ -91,7 +91,8 @@ class GTable:
         # v0502
         include_values_set = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at',
                           'user_image_url'}
-        log.info(f'Размерность include (len {len(include_values_set)}): A:{chr(len(include_values_set) + 96)}')
+        log.info(f'{include_values_set=}\n'
+                 f'Размерность include (len {len(include_values_set)}): A:{chr(len(include_values_set) + 96)}')
 
         # check first item
         if isinstance(data[0], VacancyData):

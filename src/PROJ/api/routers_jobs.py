@@ -4,6 +4,7 @@ import logging
 from fastapi import Query, Depends, APIRouter, status, Request
 from fastapi_cache.decorator import cache
 from sqlalchemy import select, text
+from fastapi.responses import HTMLResponse
 
 from src.PROJ.api.schemas_jobs import SHr, VacancyData
 from src.PROJ.core.db import async_session_factory
@@ -39,7 +40,7 @@ async def hrs_all(request: Request, params=Depends(filter_params)):
 @limiter.limit("100/minute")
 async def search_vacancies(request: Request, by_text: str = Query(None, min_length=3, max_length=255)):
     async with async_session_factory() as session:
-        q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%"))
+        q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%")).limit(100)
         result = await session.execute(q)
         data = result.unique().scalars().all()
         return data
@@ -62,11 +63,30 @@ async def robots():
 #     data = await JobsDataRepository.get_by_id(job_id, **params)
 #     return data
 
-@r_jobs.get("/webhook-run", dependencies=[Depends(current_active_user)])
-@limiter.limit("5/minute")
+@r_jobs.get("/webhook-run")  # dependencies=[Depends(current_active_user)]
+@limiter.limit("1/minute")
 async def webhook(request: Request):
     run = asyncio.create_task(run_gtable())
-    run.add_done_callback(lambda x: log.info("gtable webhook run done"))
-    return status.HTTP_200_OK
+    run.add_done_callback(lambda x: log.info("callback: gtable webhook run done"))
+
+    url_ = "https://docs.google.com/spreadsheets/d/1r24jFrWTHo5QMoG2mc32B6t7yQ32QsJcIyXuhOl1_2A/preview"
+    return HTMLResponse(
+        f"""
+        <!doctype html>
+        <html>
+        <head>
+            <meta http-equiv="refresh" content="10;url={url_}">
+            <script>
+                setTimeout(function(){{ window.location.href = '{url_}'; }}, 10000);
+            </script>
+            <title>Redirecting...</title>
+        </head>
+        <body>
+            <p>Redirecting to <a href="{url_}">{url_}</a> in 10 seconds.</p>
+        </body>
+        </html>
+        """,
+        media_type="text/html",
+    )
 
 # tst endpoints shelf

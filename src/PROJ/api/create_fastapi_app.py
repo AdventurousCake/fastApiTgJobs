@@ -90,7 +90,7 @@ def create_app(create_custom_static_urls: bool = False) -> FastAPI:
         ],
         # ["*"],
     )
-    
+
     # static folder
     app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
@@ -100,6 +100,8 @@ def create_app(create_custom_static_urls: bool = False) -> FastAPI:
 
     # admin panel
     if config.ADMIN_PANEL_ENABLED:
+        logging.warning('[bold red]/admin panel enabled[/]', extra={"markup": True})
+
         from src.PROJ.admin_panel.admin_views import UserAdmin, JobsAdmin
         from sqladmin import Admin
 

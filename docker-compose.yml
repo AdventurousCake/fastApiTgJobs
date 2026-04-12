@@ -4,7 +4,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env:/src/PROJ/.env
+      - .env
     restart: unless-stopped
     depends_on:
       - pgsql
@@ -22,7 +22,7 @@ services:
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     restart: unless-stopped
-  
+
   redis:
     image: redis:7-alpine
     ports:

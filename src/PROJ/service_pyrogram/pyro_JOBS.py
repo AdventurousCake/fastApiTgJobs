@@ -43,8 +43,8 @@ class TelegramClient:
 
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
-        chat_data = await self.client.get_chat(chat_id)
-        logger.info(f"""Processing chat: {chat_data.title} - @{chat_data.username}""")
+        chat_info = await self.client.get_chat(chat_id)
+        logger.info(f"""Processing chat: {chat_info.title} - @{chat_info.username}""")
 
         messages: List[VacancyData] = []
         messages_set_text_255 = []  # for check unique
@@ -54,7 +54,7 @@ class TelegramClient:
             if message.date < MSG_MIN_DATE:
                 continue
 
-            parsed_message = await MessageParser().parse_message(message, chat_data.username)
+            parsed_message = await MessageParser().parse_message(message, chat_info.username)
             if parsed_message:
                 # check unique
                 if UNIQUE_FILTER:
@@ -80,7 +80,7 @@ class ScrapeVacancies:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 
         logger.warning(
-            f"Starting job search.\n"
+            f"▶ Starting job search\n"
             f"USING ENV KEY TG SESSION\n"
             f"TASK_EXECUTION_TIME_LIMIT: {TASK_EXECUTION_TIME_LIMIT}s;\n"
             f"{ MSG_LIMIT=};\n"
@@ -93,6 +93,7 @@ class ScrapeVacancies:
             f"======================================"
         )
 
+        # getting data from tg
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             c_data = await client.client.get_me()
             logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}")
@@ -116,9 +117,10 @@ class ScrapeVacancies:
         hrs = {}
         errors = []
 
+        # iterate by chats
         for idx, result in enumerate(chat_results):
-            logger.info(f"Chat {self.target_chats[idx]}: {len(result)}")
 
+            # errors proc
             if isinstance(result, Exception):
                 if isinstance(result, asyncio.CancelledError):
                     logger.error(f"asyncio.CancelledError in TASK get_chat_data", exc_info=result)
@@ -130,6 +132,8 @@ class ScrapeVacancies:
 
             # good result
             else:
+                logger.warning(f"Chat {self.target_chats[idx]}: {len(result)}")
+
                 for message in result:
                     # check if channel
                     user_tg_id = message.user_tg_id
@@ -150,14 +154,19 @@ class ScrapeVacancies:
         lastweek_count = len([m for m in dates if m > datetime.now() - timedelta(days=7)])
         today_count = len([m for m in dates if m > datetime.now() - timedelta(days=1)])
 
-        logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
-                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}\n'
-                       f'[yellow]Last week: {lastweek_count}; Today: {today_count}[/yellow][/]')
-        # post proc
+        # post proc, special filter
+        seniors_data = [m for m in all_messages_new if m.level == False]
+
+        # todo
+        # all_messages_new = [m for m in all_messages_new if m.level == True]
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())
 
-        return dict(all_messages=all_messages_new, hr_data=hr_data)
+        logger.warning(f'[red] Found {len(all_messages_new)}, unique msgs: {unique_count};\n'
+                       f'Unique HRs {len(hrs)}. Errors: {len(errors)}\n'
+                       f'[yellow]Last week: {lastweek_count}; Today: {today_count}[/yellow][/]')
+
+        return dict(all_messages=all_messages_new, hr_data=hr_data, seniors_data=seniors_data)
 
 
 if __name__ == "__main__":
