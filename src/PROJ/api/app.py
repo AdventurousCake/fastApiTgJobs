@@ -3,6 +3,7 @@ import logging
 import uvicorn
 from rich.logging import RichHandler
 
+from src.PROJ.api.api_jwt_cookie import r_jwt
 from src.PROJ.api.create_fastapi_app import create_app
 from src.PROJ.api.routers_jobs import r_jobs
 from src.PROJ.users.user_routers import router_users
@@ -18,7 +19,7 @@ app.include_router(router_users)
 app.include_router(r_jobs)
 
 
-# app.include_router(r_jwt)
+app.include_router(r_jwt)
 # app.add_api_route("/jobs", jobs_html, methods=["GET"])
 
 

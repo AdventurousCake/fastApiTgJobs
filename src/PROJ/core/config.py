@@ -33,8 +33,6 @@ TEST_DB_PASS = os.getenv("TEST_DB_PASS", "postgres")
 TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}" #os.getenv("TEST_DB_URL")  # or full
 
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-#     # Using env
-#     assert "+asyncpg" in TEST_DB_URL
 
 # JWT
 JWT_KEY = os.getenv("JWT_KEY")
@@ -69,6 +67,3 @@ TARGET_CHATS = [-1001328702818,
 TARGET_CHATS_TEST = [-1001328702818,
                      -1001049086457, ]
 
-
-if __name__ == "__main__":
-    print(env_file)
