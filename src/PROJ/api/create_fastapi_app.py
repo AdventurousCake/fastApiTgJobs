@@ -63,7 +63,7 @@ def create_app(create_custom_static_urls: bool = False) -> FastAPI:
     app = FastAPI(
         title="⚙ My app",
         debug=True,
-        default_response_class=ORJSONResponse,
+        # default_response_class=ORJSONResponse,
 
         lifespan=lifespan,
         docs_url=None if create_custom_static_urls else "/docs",

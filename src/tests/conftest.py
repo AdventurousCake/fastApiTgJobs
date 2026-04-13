@@ -97,12 +97,12 @@ async def prepare_database():
 #     await init_fake_data(limit=10)
 
 # SETUP
-@pytest.fixture(scope='session')
-def event_loop(request):
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+# @pytest.fixture(scope='session')
+# def event_loop(request):
+#     """Create an instance of the default event loop for each test case."""
+#     loop = asyncio.get_event_loop_policy().new_event_loop()
+#     yield loop
+#     loop.close()
 
 
 @pytest.fixture(scope="function")
@@ -122,6 +122,6 @@ async def test_user_token(ac: AsyncClient) -> str:
 
 @pytest.fixture
 async def authorized_client(ac: AsyncClient, test_user_token: str) -> AsyncClient:
-    ac.headers["Authorization"] = f"Bearer {test_user_token}"
+    ac.headers.update({"Authorization": f"Bearer {test_user_token}"})
     logging.debug(ac)
     return ac

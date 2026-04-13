@@ -31,6 +31,10 @@ uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
 
 Возвращает список HR
 
+### /jobs/search?by_text={text}
+
+Поиск вакансий
+
 ### /docs
 
 Возвращает swagger документацию

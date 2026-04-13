@@ -5,9 +5,10 @@ from fastapi import Query, Depends, APIRouter, status, Request
 from fastapi_cache.decorator import cache
 from sqlalchemy import select, text
 from fastapi.responses import HTMLResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.PROJ.api.schemas_jobs import SHr, VacancyData
-from src.PROJ.core.db import async_session_factory
+from src.PROJ.core.db import async_session_factory, get_async_session
 from src.PROJ.core.dependencies import filter_params
 from src.PROJ.core.limiter import limiter
 from src.PROJ.db.db_repository_jobs import JobsDataRepository, HrDataRepository
@@ -19,48 +20,59 @@ log = logging.getLogger(__name__)
 
 r_jobs = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=None)
 
+
 @cache(expire=60)
 @r_jobs.get("/jobs_all", response_model=list[VacancyData])
 @limiter.limit("100/minute")
-async def jobs_all(request: Request, limit: int = Query(10, ge=0), offset: int = Query(None, ge=0),
+async def jobs_all(request: Request, session: AsyncSession = Depends(get_async_session), limit: int = Query(10, ge=0),
+                   offset: int = Query(None, ge=0),
                    ordering: str = Query(None)):
-    data = await JobsDataRepository.get_all(limit=limit, offset=offset)
+    data = await JobsDataRepository().get_all(session=session, limit=limit, offset=offset)
     return data
 
 
 @cache(expire=60)
 @r_jobs.get("/hrs_all", response_model=list[SHr])
 @limiter.limit("100/minute")
-async def hrs_all(request: Request, params=Depends(filter_params)):
-    data = await HrDataRepository.get_all(**params)
+async def hrs_all(request: Request, params=Depends(filter_params), session: AsyncSession = Depends(get_async_session)):
+    data = await HrDataRepository().get_all(session, **params)
     return data
 
+
 @cache(expire=60)
-@r_jobs.get("/search", response_model=list[VacancyData], dependencies=[Depends(current_active_user)])
+@r_jobs.get("/search", response_model=list[VacancyData],
+            # dependencies=[Depends(current_active_user)]
+            )
 @limiter.limit("100/minute")
 async def search_vacancies(request: Request, by_text: str = Query(None, min_length=3, max_length=255)):
+    if not by_text or len(by_text.strip()) < 3:
+        return []
+
     async with async_session_factory() as session:
-        q = select(Jobs).filter(Jobs.text_.ilike(f"%{by_text}%")).limit(100)
+        q = select(Jobs).filter(Jobs.text_.icontains(str(by_text))).limit(100)
         result = await session.execute(q)
         data = result.unique().scalars().all()
         return data
+
 
 @r_jobs.get('/status')
 async def status_():
     return status.HTTP_200_OK
 
+
 @r_jobs.get('/robots.txt')
 async def robots():
     return "User-agent: *\nDisallow: /"
 
+
 # @r_jobs.get('/hr/{hr_id}', response_model=SHr)
 # async def hr_by_id(hr_id: int, params=Depends(filter_params)):
-#     data = await HrDataRepository.get_by_id(hr_id, **params)
+#     data = await HrDataRepository().get_by_id(hr_id, **params)
 #     return data
 
 # @r_jobs.get('/job/{job_id}', response_model=VacancyData)
 # async def job_by_id(job_id: int, params=Depends(filter_params)):
-#     data = await JobsDataRepository.get_by_id(job_id, **params)
+#     data = await JobsDataRepository().get_by_id(job_id, **params)
 #     return data
 
 @r_jobs.get("/webhook-run")  # dependencies=[Depends(current_active_user)]

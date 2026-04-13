@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import os
 
-env_file = Path(__file__).resolve().parent.parent / '.env'
+env_file = Path(__file__).resolve().parent.parent.parent.parent / '.env'
 env = load_dotenv(env_file)
 if not env:
     logging.critical("No .env file")
