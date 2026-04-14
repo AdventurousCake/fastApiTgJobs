@@ -22,9 +22,7 @@ proxy= {
 
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
-                 password: str = None, session_string: str = None, proxy=None):
-        if proxy is None:
-            proxy = proxy
+                 password: str = None, session_string: str = None):
         logger.info("using proxy: %s", proxy)
 
         if not session_name:

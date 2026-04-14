@@ -43,7 +43,7 @@ logging.warning(f"!!!!!!!!!!!!!!!!\nMODE: {config.MODE}\n{DATABASE_URL}\n\n")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-engine_async = create_async_engine(DATABASE_URL, echo=True, **DATABASE_PARAMS)
+engine_async = create_async_engine(DATABASE_URL, echo=False, **DATABASE_PARAMS)
 async_session_factory = async_sessionmaker(engine_async, expire_on_commit=False)  # ASYNC WITH
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
