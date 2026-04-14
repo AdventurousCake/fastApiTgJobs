@@ -31,7 +31,8 @@ class TelegramClient:
             logger.warning("Starting in memory session client")
             self.client = Client(":memory:", session_string=session_string, proxy=proxy)
         else:
-            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
+            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password,
+                                 proxy=proxy)
 
     async def __aenter__(self):
         await self.client.start()
