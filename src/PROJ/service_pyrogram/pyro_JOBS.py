@@ -15,7 +15,7 @@ from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 logger = logging.getLogger(__name__)
 
 proxy= {
-     "scheme": "http",  # "socks4", "socks5" and "http" are supported
+     "scheme": "socks5",  # "socks4", "socks5" and "http" are supported
      "hostname": "localhost",
      "port": 18080,
  }
