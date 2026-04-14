@@ -14,13 +14,22 @@ from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
 logger = logging.getLogger(__name__)
 
+proxy= {
+     "scheme": "http",  # "socks4", "socks5" and "http" are supported
+     "hostname": "localhost",
+     "port": 18080,
+ }
 
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
-                 password: str = None, session_string: str = None):
+                 password: str = None, session_string: str = None, proxy=None):
+        if proxy is None:
+            proxy = proxy
+        logger.info("using proxy: %s", proxy)
+
         if not session_name:
             logger.warning("Starting in memory session client")
-            self.client = Client(":memory:", session_string=session_string)
+            self.client = Client(":memory:", session_string=session_string, proxy=proxy)
         else:
             self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
 
