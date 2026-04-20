@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime, timedelta
 import itertools
 import logging
@@ -19,6 +20,8 @@ proxy= {
      "hostname": "localhost",
      "port": 18080,
  }
+if os.name == "nt":
+    proxy.update({"scheme": "http"})
 
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
@@ -105,6 +108,7 @@ class ScrapeVacancies:
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             c_data = await client.client.get_me()
             logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}")
+            logger.warning(f"{proxy=}")
 
             # list of coroutines
             tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),

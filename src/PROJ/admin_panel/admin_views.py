@@ -14,7 +14,7 @@ class UserAdmin(ModelView, model=User):
 
 
 class JobsAdmin(ModelView, model=Jobs):
-    column_list = [c.name for c in Jobs.__table__.c]
+    column_list = [c.name for c in Jobs.__table__.c] + [Jobs.hr]
     can_delete = True
     name = "Jobs"
     icon = "fa-solid fa-user"

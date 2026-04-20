@@ -8,7 +8,7 @@ from starlette.responses import Response
 
 from src.PROJ.core import config
 
-r_jwt = APIRouter(prefix="/jwt", tags=["⚙ jwt"], dependencies=None)
+r_jwt = APIRouter(prefix="/jwt", tags=["JWT"], dependencies=None)
 
 
 # ===================================== JWT AUTH
@@ -40,13 +40,13 @@ def get_token(request: Request):
 
 # raw
 @r_jwt.get("/jwt-decode")
-async def tst6_jst_test(request: Request, token: str = Depends(get_token)):
+async def jwt_decode(request: Request, token: str = Depends(get_token)):
     # return token
     return decode_access_token(token)
 
 
 @r_jwt.post("/jwt-create")
-async def tst6_jst_test(response: Response):  # user_data: SUserAuthData):
+async def jwt_create(response: Response):  # user_data: SUserAuthData):
     # user = await authenticate_user(user_data.email, user_data.password)
     # if not user:
     #     raise IncorrectEmailOrPassword
