@@ -57,6 +57,7 @@ jobs:
     - name: Test with pytest
       env:
         #TEST_DB_URL: ${{ secrets.TEST_DB_URL }}
+        #DATABASE_URL:
         MODE: TEST
       run: |
         pytest

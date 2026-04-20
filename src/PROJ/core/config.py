@@ -35,8 +35,9 @@ TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # JWT
-JWT_KEY = os.getenv("JWT_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_TOKEN_EXPIRE_MINUTES = 60 * 24 * 30
 
 FASTAPI_USERS_SECRET = os.getenv("FASTAPI_USERS_SECRET")
 

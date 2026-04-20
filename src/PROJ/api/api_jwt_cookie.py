@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 
 import jwt
 from fastapi import APIRouter, HTTPException, Depends
@@ -14,28 +14,32 @@ r_jwt = APIRouter(prefix="/jwt", tags=["JWT"], dependencies=None)
 # ===================================== JWT AUTH
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=30)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(payload=to_encode, key=config.JWT_KEY, algorithm=config.JWT_ALGORITHM)  # HS256
+    expire = datetime.now(timezone.utc) + timedelta(minutes=config.JWT_TOKEN_EXPIRE_MINUTES)
+    expire_ts = int(expire.timestamp())
+    to_encode.update({"exp": expire_ts})
+
+    encoded_jwt = jwt.encode(payload=to_encode, key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM)  # HS256
     return encoded_jwt
 
 
 def decode_access_token(token: str) -> dict:
     try:
-        decoded = jwt.decode(jwt=token, key=config.JWT_KEY, algorithms=config.JWT_ALGORITHM)
+        decoded = jwt.decode(jwt=token, key=config.JWT_SECRET_KEY, algorithms=config.JWT_ALGORITHM)
 
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-    # if decoded.get("exp") < datetime.utcnow().timestamp():
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    payload = decoded["payload"]
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    if payload.get("exp") < now_ts:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return decoded
 
 
 def get_token(request: Request):
     token = request.cookies.get("jwt_access_token")
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return token
 
 # raw
@@ -52,7 +56,7 @@ async def jwt_create(response: Response):  # user_data: SUserAuthData):
     #     raise IncorrectEmailOrPassword
 
     access_token = create_access_token(
-        {"sub": str(999)})  # by user id; {"exp": datetime.utcnow() + timedelta(minutes=30)}
+        data={"sub": str(999)})  # by user id;
 
     response.set_cookie("jwt_access_token", access_token, httponly=True)
     return dict(access_token=access_token)
