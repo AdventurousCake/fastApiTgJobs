@@ -6,11 +6,11 @@ from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import os
 
-env_file = Path(__file__).resolve().parent.parent.parent.parent / '.env'
-env = load_dotenv(env_file)
+ENV_FILE = Path(__file__).resolve().parent.parent.parent.parent / '.env'
+env = load_dotenv(ENV_FILE)
 if not env:
     logging.critical("No .env file")
-logging.warning(f"{env_file=}")
+logging.warning(f"{ENV_FILE=}")
 
 
 DB_PORT = os.getenv("DB_PORT", "5432")

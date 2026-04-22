@@ -46,8 +46,10 @@ class GTable:
         worksheets = self.sh.worksheets()
         worksheet_info = dict(sheet_title=self.sh.title,
                               count_worksheets=len(worksheets),
-                              names=[worksheet.title for worksheet in worksheets],
-                              worksheet1_prop=self.worksheet1._properties)
+                              names=[(worksheet.title, "id " + str(worksheet.index), worksheet.row_count) for worksheet in worksheets],
+                              worksheet1_prop=self.worksheet1._properties,
+                              url=worksheets[0].url,
+                              )
         return worksheet_info
 
     def get_all_from2row(self):
@@ -83,7 +85,7 @@ class GTable:
                                     value_input_option=ValueInputOption.user_entered)
 
     @time_counter
-    def add_to_sheet_vacancydata(self, data=None, sh_target_idx=DEFAULT_WORKSHEET_INDEX):
+    def add_to_sheet_vacancydata(self, data, sh_target_idx=DEFAULT_WORKSHEET_INDEX):
         if not data:
             log.warning('DEV: Write test data')
             raise NotImplementedError
@@ -112,28 +114,30 @@ class GTable:
 
         try:
             sh_target.delete_rows(2, sh_target.row_count)
+            log.info(f'Done delete rows 2-{sh_target.row_count} in {sh_target.title}')
         except APIError as e:
             logging.error(e, exc_info=True)
         except Exception as e:
             logging.error(e)
 
-        target_row = 1
+        TARGET_ROW = 1
 
         log_data = (f'[cyan] TABLE INFO:\n'
-                    f'{pformat(self.get_info())}\n'
+                    f'{pformat(self.get_info(), sort_dicts=False)}\n'
                     f'{sh_target.column_count=}, {sh_target.row_count=}\n'
                     f'{sh_target.frozen_row_count=}, {sh_target.frozen_col_count=}\n'
-                    f'>>> INSERT target: {sh_target.title}; {target_row=}...\n'
+                    f'>>> INSERT target: {sh_target.title}; {TARGET_ROW=}...\n'
                     f'[/]')
         log.info(log_data, extra={"markup": True})
 
         prep_values = [list(d.values()) + ['=now()'] for d in data]  # header_list = list(data[0].keys())
+        rows_count = len(prep_values)
         try:
-            sh_target.insert_rows(values=prep_values, value_input_option=ValueInputOption.user_entered, row=target_row)
+            sh_target.insert_rows(values=prep_values, value_input_option=ValueInputOption.user_entered, row=TARGET_ROW)
         except Exception as e:
             raise
 
-        log.info(f'Done insert to {sh_target.title}')
+        log.info(f'Done insert to {sh_target.title} (+{rows_count})')
 
 @time_counter
 def g_table_main(data):
@@ -144,5 +148,5 @@ def g_table_main(data):
 
 if __name__ == '__main__':
     gt = GTable(spreadsheet_id=TABLE_ID_KEY)
-    pprint(gt.get_info())
+    pprint(gt.get_info(), sort_dicts=False)
     # gt.add_to_sheet()
