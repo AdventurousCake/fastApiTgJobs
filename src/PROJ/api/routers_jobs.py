@@ -87,14 +87,14 @@ async def webhook(request: Request):
         <!doctype html>
         <html>
         <head>
-            <meta http-equiv="refresh" content="10;url={url_}">
+            <meta http-equiv="refresh" content="15;url={url_}">
             <script>
-                setTimeout(function(){{ window.location.href = '{url_}'; }}, 10000);
+                setTimeout(function(){{ window.location.href = '{url_}'; }}, 15000);
             </script>
             <title>Redirecting...</title>
         </head>
         <body>
-            <p>Redirecting to <a href="{url_}">{url_}</a> in 10 seconds.</p>
+            <p>Redirecting to <a href="{url_}">{url_}</a> in 15 seconds.</p>
         </body>
         </html>
         """,
