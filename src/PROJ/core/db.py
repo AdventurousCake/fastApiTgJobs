@@ -57,14 +57,10 @@ async def init_models(drop=False):
             logging.warning("!drop db")
             await conn.run_sync(Base.metadata.drop_all)
 
-        # engine_sync.echo = True
-        # Base.metadata.create_all(engine_sync)
-
         await conn.run_sync(Base.metadata.create_all)
 
         logging.warning(f"INIT {DATABASE_URL}; tables in metadata:")
-        _table_names = [
-            table_name for table_name in Base.metadata.tables.keys()]
+        _table_names = [table_name for table_name in Base.metadata.tables.keys()]
         for table_name in _table_names:
             logging.warning(table_name)
 
