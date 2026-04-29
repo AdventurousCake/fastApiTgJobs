@@ -15,13 +15,11 @@ from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
 logger = logging.getLogger(__name__)
 
-proxy= {
-     "scheme": "socks5",  # "socks4", "socks5" and "http" are supported
-     "hostname": "localhost",
-     "port": 18080,
- }
+proxy={"scheme": "socks5",  # "socks4", "socks5" and "http" are supported
+       "hostname": "localhost",
+       "port": 1080}
 if os.name == "nt":
-    proxy.update({"scheme": "http"})
+    proxy.update({"scheme": "http", "port": 18080,})
 
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
@@ -29,14 +27,19 @@ class TelegramClient:
         logger.info("using proxy: %s", proxy)
 
         if not session_name:
-            logger.warning("Starting in memory session client")
-            self.client = Client(":memory:", session_string=session_string, proxy=proxy)
+            logger.warning("Created IN MEMORY session client")
+            self.client = Client(":memory:", session_string=session_string, proxy=proxy,
+                                 no_updates=True)
         else:
             self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password,
                                  proxy=proxy)
 
     async def __aenter__(self):
-        await self.client.start()
+        try:
+            logger.warning("Starting client...")
+            await self.client.start()
+        except Exception as e:
+                logger.error("Error initializing Telegram client with session string", exc_info=e)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

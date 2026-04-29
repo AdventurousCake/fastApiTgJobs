@@ -46,7 +46,8 @@ class GTable:
         worksheets = self.sh.worksheets()
         worksheet_info = dict(sheet_title=self.sh.title,
                               count_worksheets=len(worksheets),
-                              names=[(worksheet.title, "id " + str(worksheet.index), worksheet.row_count) for worksheet in worksheets],
+                              names=[(worksheet.title, "id " + str(worksheet.index), worksheet.row_count)
+                                     for worksheet in worksheets],
                               worksheet1_prop=self.worksheet1._properties,
                               url=worksheets[0].url,
                               )
@@ -109,8 +110,8 @@ class GTable:
 
         # Delete prev + insert new
         sh_target = self.sh.get_worksheet(sh_target_idx)
-        if not sh_target.title == "PROD":
-            raise ValueError(f'Only PROD sheet can be updated. Current: {sh_target.title}')
+        if not sh_target.title == DEFAULT_WORKSHEET_NAME:
+            raise ValueError(f'Only {DEFAULT_WORKSHEET_NAME} sheet can be updated. Current: {sh_target.title}')
 
         try:
             sh_target.delete_rows(2, sh_target.row_count)
