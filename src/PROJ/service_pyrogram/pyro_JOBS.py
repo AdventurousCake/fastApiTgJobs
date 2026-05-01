@@ -60,7 +60,7 @@ class TelegramClient:
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
         chat_info = await self.client.get_chat(chat_id)
-        logger.warning(f"""Processing chat: {chat_info.title} - @{chat_info.username} ({chat_id})""")
+        logger.warning(f"""Processing chat: {chat_info.title[:15]} - @{chat_info.username} ({chat_id})""")
 
         messages: List[VacancyData] = []
         messages_set_text_255 = []  # for check unique
@@ -174,7 +174,6 @@ class ScrapeVacancies:
         # post proc, special filter
         seniors_data = [m for m in all_messages_new if m.level == False]
 
-        # todo
         # all_messages_new = [m for m in all_messages_new if m.level == True]
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())

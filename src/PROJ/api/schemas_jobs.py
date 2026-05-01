@@ -50,8 +50,8 @@ class VacancyData(BaseModel):
         _INCLUDE_VALUES_SET = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at', 'posted_at_ts',
                                'user_image_url'}
 
-        log.warning(f'{_INCLUDE_VALUES_SET=}\n'
-                 f'Размерность include (len {len(_INCLUDE_VALUES_SET)}): A:{chr(len(_INCLUDE_VALUES_SET) + 96)}')
+        # log.warning(f'{_INCLUDE_VALUES_SET=}\n'
+        #          f'Размерность include (len {len(_INCLUDE_VALUES_SET)}): A:{chr(len(_INCLUDE_VALUES_SET) + 96)}')
 
         return super().model_dump(**kwargs, mode='json', include=_INCLUDE_VALUES_SET)
 
