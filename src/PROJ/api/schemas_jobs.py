@@ -1,9 +1,11 @@
 import logging
 from datetime import datetime
 from functools import cached_property
-from typing import Optional, Any
+from typing import Optional, Any, Literal, Callable
 
 from pydantic import BaseModel, Field, computed_field, field_serializer, model_validator, model_serializer
+import logging as log
+
 
 class VacancyData(BaseModel):
     """v1402"""
@@ -16,6 +18,7 @@ class VacancyData(BaseModel):
     contacts: str
     user_username: Optional[str] = Field(default=None)
     posted_at: datetime
+    posted_at_ts: float
     msg_url: str
     chat_username: str
     chat_id: int
@@ -42,6 +45,15 @@ class VacancyData(BaseModel):
     def chat_username_PROP(self) -> str:
         if self.msg_url:
             return self.msg_url.split("/")[3]
+
+    def model_dump(self, **kwargs) -> str:
+        _INCLUDE_VALUES_SET = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at', 'posted_at_ts',
+                               'user_image_url'}
+
+        log.warning(f'{_INCLUDE_VALUES_SET=}\n'
+                 f'Размерность include (len {len(_INCLUDE_VALUES_SET)}): A:{chr(len(_INCLUDE_VALUES_SET) + 96)}')
+
+        return super().model_dump(**kwargs, mode='json', include=_INCLUDE_VALUES_SET)
 
     # @computed_field
     # @cached_property

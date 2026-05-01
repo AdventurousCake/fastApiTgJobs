@@ -80,6 +80,7 @@ class MessageParser:
                 user_tg_id=user_tg_id,
                 user_image_id=user_image_id,
                 posted_at=message.date,
+                posted_at_ts=message.date.timestamp(),
                 msg_url=message.link,
                 chat_username=chat_username,
                 chat_id=chat_id,

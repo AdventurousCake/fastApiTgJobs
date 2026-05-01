@@ -19,7 +19,8 @@ proxy = {"scheme": "socks5",  # "socks4", "socks5" and "http" are supported
          "hostname": "localhost",
          "port": 1080}
 if os.name == "nt":
-    proxy.update({"scheme": "http", "port": 18080, })
+    # proxy.update({"scheme": "http", "port": 18080, })
+    proxy=None
 
 
 class TelegramClient:

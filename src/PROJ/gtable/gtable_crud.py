@@ -91,15 +91,10 @@ class GTable:
             log.warning('DEV: Write test data')
             raise NotImplementedError
 
-        # v0502
-        include_values_set = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at',
-                          'user_image_url'}
-        log.info(f'{include_values_set=}\n'
-                 f'Размерность include (len {len(include_values_set)}): A:{chr(len(include_values_set) + 96)}')
-
         # check first item
         if isinstance(data[0], VacancyData):
-            data = [data_item.model_dump(mode='json', include=include_values_set) for data_item in data]
+            data = [data_item.model_dump() for data_item in data]
+            # data = [data_item.model_dump(mode='json', include=include_values_set) for data_item in data]
         else:
             raise ValueError('data must be list of VacancyData')
 
@@ -129,7 +124,7 @@ class GTable:
                     f'{sh_target.frozen_row_count=}, {sh_target.frozen_col_count=}\n'
                     f'>>> INSERT target: {sh_target.title}; {TARGET_ROW=}...\n'
                     f'[/]')
-        log.info(log_data, extra={"markup": True})
+        log.warning(log_data, extra={"markup": True})
 
         prep_values = [list(d.values()) + ['=now()'] for d in data]  # header_list = list(data[0].keys())
         rows_count = len(prep_values)
@@ -138,7 +133,7 @@ class GTable:
         except Exception as e:
             raise
 
-        log.info(f'Done insert to {sh_target.title} (+{rows_count})')
+        log.info(f'✅ Done insert to {sh_target.title} (+{rows_count})')
 
 @time_counter
 def g_table_main(data):
