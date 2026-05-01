@@ -18,7 +18,7 @@ class VacancyData(BaseModel):
     contacts: str
     user_username: Optional[str] = Field(default=None)
     posted_at: datetime
-    posted_at_ts: float
+    posted_at_ts: int
     msg_url: str
     chat_username: str
     chat_id: int

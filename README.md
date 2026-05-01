@@ -16,10 +16,10 @@
 3. Запустить
 
 ```
-uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
+uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 8000 --workers 2
 ```
 
-4. Открыть в браузере localost:9000
+4. Открыть в браузере localost:8000
 
 ## URLs:
 

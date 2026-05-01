@@ -35,7 +35,6 @@ class MessageParser:
         if vacancy_filter.is_ads(text_low):
             return None
 
-        # bool
         level = False if vacancy_filter.is_senior_position(text_low) else True
         # special filter
         # if PASS_SENIORS_TMP and level == False:
@@ -80,7 +79,7 @@ class MessageParser:
                 user_tg_id=user_tg_id,
                 user_image_id=user_image_id,
                 posted_at=message.date,
-                posted_at_ts=message.date.timestamp(),
+                posted_at_ts=int(message.date.timestamp()),
                 msg_url=message.link,
                 chat_username=chat_username,
                 chat_id=chat_id,
