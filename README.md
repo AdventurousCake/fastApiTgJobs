@@ -9,6 +9,11 @@
 
 Парсер вакансий телеграм-каналов
 
+
+## Demo
+https://github.com/user-attachments/assets/94191e8f-ac74-47b3-a771-dd8a129f207e
+
+
 ## Пример использования
 
 1. Получить сессию pyrogram, сохранить в src/PROJ/service_pyrogram
