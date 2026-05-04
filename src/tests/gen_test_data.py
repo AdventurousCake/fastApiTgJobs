@@ -40,6 +40,7 @@ def generate_model_vd(dump=False, text_len=None) -> VacancyData | dict:
         user_image_url=fake.image_url(),
 
         posted_at=fake.date_time_this_month(),
+        posted_at_ts=int(fake.date_time_this_month().timestamp()),
         msg_url=tg_url_schema,
         # msg_url=fake.url(schemes=tg_url_schemas),
         chat_username=fake.user_name(),
