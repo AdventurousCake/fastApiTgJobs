@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime, timedelta
 import itertools
 import logging
@@ -14,18 +15,32 @@ from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
 logger = logging.getLogger(__name__)
 
+proxy = {"scheme": "socks5",  # "socks4", "socks5" and "http" are supported
+         "hostname": "localhost",
+         "port": 1080}
+if os.name == "nt":
+    proxy=None
+
 
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
                  password: str = None, session_string: str = None):
+        logger.info("using proxy: %s", proxy)
+
         if not session_name:
-            logger.warning("Starting in memory session client")
-            self.client = Client(":memory:", session_string=session_string)
+            logger.warning("Created IN MEMORY session client")
+            self.client = Client(":memory:", session_string=session_string, proxy=proxy,
+                                 no_updates=True)
         else:
-            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password)
+            self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password,
+                                 proxy=proxy)
 
     async def __aenter__(self):
-        await self.client.start()
+        try:
+            logger.warning("Starting client...")
+            await self.client.start()
+        except Exception as e:
+            logger.error("Error initializing Telegram client with session string", exc_info=e)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -44,7 +59,7 @@ class TelegramClient:
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
         chat_info = await self.client.get_chat(chat_id)
-        logger.info(f"""Processing chat: {chat_info.title} - @{chat_info.username}""")
+        logger.warning(f"""Processing chat: {chat_info.title[:15]} - @{chat_info.username} ({chat_id})""")
 
         messages: List[VacancyData] = []
         messages_set_text_255 = []  # for check unique
@@ -97,6 +112,7 @@ class ScrapeVacancies:
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
             c_data = await client.client.get_me()
             logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}")
+            logger.warning(f"{proxy=}")
 
             # list of coroutines
             tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),
@@ -157,7 +173,6 @@ class ScrapeVacancies:
         # post proc, special filter
         seniors_data = [m for m in all_messages_new if m.level == False]
 
-        # todo
         # all_messages_new = [m for m in all_messages_new if m.level == True]
         all_messages_new.sort(key=lambda x: x.posted_at, reverse=True)
         hr_data = tuple(hrs.items())

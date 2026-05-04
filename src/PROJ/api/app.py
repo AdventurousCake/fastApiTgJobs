@@ -24,7 +24,7 @@ app.include_router(r_jwt)
 
 
 def api_run():
-    uvicorn.run(app, host="localhost", port=8000, log_level="debug")
+    uvicorn.run(app, host="localhost", port=8000, log_level="info")
 
 
 if __name__ == "__main__":

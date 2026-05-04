@@ -1,6 +1,6 @@
 fastapi[all]==0.135
 fastapi-users[sqlalchemy]
-uvicorn[standard]~=0.34
+uvicorn[standard]~=0.46
 alembic~=1.13
 asyncpg~=0.29
 sqlalchemy~=2.0
@@ -12,7 +12,7 @@ jinja2
 beautifulsoup4
 plotly
 rich~=14.3
-pytest~=8.3.1
+pytest>=9.0.3
 pytest_asyncio
 slowapi~=0.1
 sqladmin[full]~=0.24
@@ -28,10 +28,10 @@ python-jose[cryptography]
 pyjwt~=2.12
 orjson~=3.10
 pydantic~=2.8
-python-dotenv~=1.0.1
+python-dotenv~=1.2
 httpx~=0.28
 bcrypt
-pandas~=2.2.2
+#pandas~=2.2.2
 openpyxl~=3.1.5
 gspread~=6.2
 

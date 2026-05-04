@@ -35,6 +35,7 @@ class IntIdPkMixin:
 
 class DefaultBase(Base):
     __abstract__ = True
+
     id: Mapped[int64pk]
     created_at: Mapped[date_default_now]
     updated_at: Mapped[updated_at]

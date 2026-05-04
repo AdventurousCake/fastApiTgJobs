@@ -6,11 +6,11 @@ from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import os
 
-env_file = Path(__file__).resolve().parent.parent / '.env'
-env = load_dotenv(env_file)
+ENV_FILE = Path(__file__).resolve().parent.parent.parent.parent / '.env'
+env = load_dotenv(ENV_FILE)
 if not env:
     logging.critical("No .env file")
-logging.warning(f"{env_file=}")
+logging.warning(f"{ENV_FILE=}")
 
 
 DB_PORT = os.getenv("DB_PORT", "5432")
@@ -35,8 +35,9 @@ TEST_DB_URL = f"postgresql+asyncpg://{TEST_DB_USER}:{TEST_DB_PASS}@{TEST_DB_HOST
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # JWT
-JWT_KEY = os.getenv("JWT_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_TOKEN_EXPIRE_MINUTES = 60 * 24 * 30
 
 FASTAPI_USERS_SECRET = os.getenv("FASTAPI_USERS_SECRET")
 

@@ -9,6 +9,11 @@
 
 Парсер вакансий телеграм-каналов
 
+
+## Demo
+https://github.com/user-attachments/assets/94191e8f-ac74-47b3-a771-dd8a129f207e
+
+
 ## Пример использования
 
 1. Получить сессию pyrogram, сохранить в src/PROJ/service_pyrogram
@@ -16,10 +21,10 @@
 3. Запустить
 
 ```
-uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
+uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 8000
 ```
 
-4. Открыть в браузере localost:9000
+4. Открыть в браузере localost:8000
 
 ## URLs:
 
@@ -30,6 +35,10 @@ uvicorn src.PROJ.api.app:app --host 0.0.0.0 --port 9000
 ### /jobs/hrs_all
 
 Возвращает список HR
+
+### /jobs/search?by_text={text}
+
+Поиск вакансий
 
 ### /docs
 
