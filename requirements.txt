@@ -1,6 +1,6 @@
 fastapi[all]==0.135
 fastapi-users[sqlalchemy]
-uvicorn[standard]~=0.34
+uvicorn[standard]~=0.46
 alembic~=1.13
 asyncpg~=0.29
 sqlalchemy~=2.0
