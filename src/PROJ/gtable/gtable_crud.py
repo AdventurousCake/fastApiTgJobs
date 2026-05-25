@@ -38,9 +38,17 @@ class GTable:
                 log.error(e)
                 raise ValueError('Check credentials.json env string') from e
 
-        self.sh = self.gc.open_by_key(spreadsheet_id)
-        self.worksheet1 = self.sh.sheet1
+        self.sh: Spreadsheet = self.gc.open_by_key(spreadsheet_id)
+        self.worksheet1: Worksheet = self.sh.sheet1
 
+    def _get_metadata(self):
+        """returns numberFormat types"""
+        cell_label = "A1:J1"
+        return self.sh.fetch_sheet_metadata({
+            'includeGridData': False,
+            'ranges': [f"{DEFAULT_WORKSHEET_NAME}!{cell_label}"],
+            'fields': 'sheets.data.rowData.values.effectiveFormat.numberFormat'
+        })
 
     def get_info(self) -> dict:
         worksheets = self.sh.worksheets()
@@ -49,8 +57,12 @@ class GTable:
                               names=[(worksheet.title, "id " + str(worksheet.index), worksheet.row_count)
                                      for worksheet in worksheets],
                               worksheet1_prop=self.worksheet1._properties,
+                              wsh2_prod_prop=self.sh.get_worksheet(1)._properties,
                               url=worksheets[0].url,
                               )
+
+        metadata = self._get_metadata()
+        logging.warning(f"{metadata=}")
         return worksheet_info
 
     def get_all_from2row(self):
@@ -101,7 +113,7 @@ class GTable:
         # show
         data_example = data[0].copy()
         data_example['text_'] = data_example['text_'][:20]
-        pprint(data_example)
+        log.warning(f"{data_example=}")
 
         # Delete prev + insert new
         sh_target = self.sh.get_worksheet(sh_target_idx)
@@ -110,7 +122,7 @@ class GTable:
 
         try:
             sh_target.delete_rows(2, sh_target.row_count)
-            log.info(f'Done delete rows 2-{sh_target.row_count} in {sh_target.title}')
+            log.warning(f'Done delete rows 2-{sh_target.row_count} in {sh_target.title}')
         except APIError as e:
             logging.error(e, exc_info=True)
         except Exception as e:
@@ -133,7 +145,7 @@ class GTable:
         except Exception as e:
             raise
 
-        log.info(f'✅ Done insert to {sh_target.title} (+{rows_count})')
+        log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
 
 @time_counter
 def g_table_main(data):

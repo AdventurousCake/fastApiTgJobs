@@ -47,8 +47,7 @@ class VacancyData(BaseModel):
             return self.msg_url.split("/")[3]
 
     def model_dump(self, **kwargs) -> str:
-        _INCLUDE_VALUES_SET = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at', 'posted_at_ts',
-                               'user_image_url'}
+        _INCLUDE_VALUES_SET = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at', 'posted_at_ts'}
 
         # log.warning(f'{_INCLUDE_VALUES_SET=}\n'
         #          f'Размерность include (len {len(_INCLUDE_VALUES_SET)}): A:{chr(len(_INCLUDE_VALUES_SET) + 96)}')

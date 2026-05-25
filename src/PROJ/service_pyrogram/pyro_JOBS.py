@@ -39,6 +39,10 @@ class TelegramClient:
         try:
             logger.warning("Starting client...")
             await self.client.start()
+
+            c_data = await self.client.get_me()
+            logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}\n{proxy=}")
+
         except Exception as e:
             logger.error("Error initializing Telegram client with session string", exc_info=e)
         return self
@@ -110,10 +114,6 @@ class ScrapeVacancies:
 
         # getting data from tg
         async with TelegramClient(session_string=TG_SESSION_STRING) as client:
-            c_data = await client.client.get_me()
-            logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}")
-            logger.warning(f"{proxy=}")
-
             # list of coroutines
             tasks = [asyncio.wait_for(client.get_chat_data(chat_id, MSG_LIMIT),
                                       timeout=TASK_EXECUTION_TIME_LIMIT)
