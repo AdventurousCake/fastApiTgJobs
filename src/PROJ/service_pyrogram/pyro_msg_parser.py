@@ -64,8 +64,8 @@ class MessageParser:
         text_cleaned = text_cleaned.lstrip()
 
         # clean ad
-        ad_str = """Python Job 💬 в Telegram | 💙 в VK | 💬 в Max"""
-        text_cleaned = text_cleaned.replace(ad_str, "")
+        ad_str = """Python Job в Telegram | в VK | в Max"""
+        text_cleaned = text_cleaned.replace(ad_str, "")[:4096]
 
         try:
             v_data = VacancyData(
