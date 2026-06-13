@@ -1,9 +1,8 @@
 import logging
 from datetime import datetime
-from functools import cached_property
 from typing import Optional, Any, Literal, Callable
 
-from pydantic import BaseModel, Field, computed_field, field_serializer, model_validator, model_serializer
+from pydantic import BaseModel, Field, computed_field, field_serializer, field_validator, model_validator, model_serializer
 import logging as log
 
 
@@ -41,6 +40,13 @@ class VacancyData(BaseModel):
         if user_image_url:
             return f'=image("{user_image_url}")'
 
+    @field_validator("chat_id")
+    @classmethod
+    def val_chat_id(cls, value):
+        if value == 0:
+            raise ValueError("chat_id = 0")
+        return value
+
     @property
     def chat_username_PROP(self) -> str:
         if self.msg_url:
@@ -76,7 +82,7 @@ class VacancyDataGTableExport(VacancyData):
     def as_dict(self, exclude=None) -> dict[str, str | int]:
         d = self.__dict__
         return {k: v for k, v in d.items() if k not in exclude}
-    
+
 class VacancyDataDB(VacancyData):
     pass
 
@@ -88,12 +94,12 @@ class SHr(BaseModel):
 
     def as_dict(self) -> dict[str, str | int]:
         return self.__dict__
-    
+
 
 class Search(BaseModel):
     id: int
     date: datetime
     new_vacancies_count: int
     vacancies: list[VacancyData]
-    
+
     def new_vacancies_count(self) -> int: ...

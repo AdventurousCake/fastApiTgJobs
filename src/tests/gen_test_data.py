@@ -9,7 +9,7 @@ from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.db import async_session_factory, init_models
 from src.PROJ.db.models_jobs import HR, Jobs
 
-fake = Faker(locale="ru_RU")
+fake = Faker(locale=["ru_RU", "en_US"])
 
 
 # def generate_model_hr_pkdepends(dump=False) -> HR | dict:
@@ -19,7 +19,7 @@ fake = Faker(locale="ru_RU")
 #         return hr.model_dump()
 #     return hr
 
-def generate_model_vd(dump=False, text_len=None) -> VacancyData | dict:
+def generate_fake_model_vd(dump=False, text_len=None) -> VacancyData | dict:
     tg_url_schema = 'https://t.me/python_scripts_hr/' + str(random.randint(1000, 9999))
     tags_text = ['#vacancy', '#bigtech', '#remote', ' ']
     tags_text_str = ' '.join(tags_text)
@@ -47,13 +47,14 @@ def generate_model_vd(dump=False, text_len=None) -> VacancyData | dict:
         chat_id=fake.random_int(min=100000, max=999999),
         views=fake.random_int(min=0, max=1000),
     )
+    logging.warning(f"vd: {vd}")
     if dump:
         return vd.model_dump()
     return vd
 
 
 def generate_data(limit) -> tuple:
-    vacancy_data = [generate_model_vd().as_dict() for _ in range(limit)]
+    vacancy_data = [generate_fake_model_vd().as_dict() for _ in range(limit)]
     # vacancy_data = [generate_model(dump=True) for _ in range(10)]
     hr_data = [(vacancy.get("user_tg_id"), vacancy.get("user_username")) for vacancy in vacancy_data]
     return vacancy_data, hr_data
