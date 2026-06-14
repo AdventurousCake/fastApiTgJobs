@@ -1,4 +1,3 @@
-from rich.logging import RichHandler
 import logging
 import os
 from typing import AsyncGenerator, Annotated
@@ -39,8 +38,8 @@ else:
     DATABASE_URL = config.DB_URL
     DATABASE_PARAMS = {}
 
-logging.warning(f"!!!!!!!!!!!!!!!!\n"
-                f"MODE: {config.MODE}\n{DATABASE_URL}\n\n")
+logging.warning(f"[DB] !!!!!!!!!!!!!!!!\n"
+                f"[DB] MODE: {config.MODE}\n{DATABASE_URL}\n")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -54,15 +53,15 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 async def init_models(drop=False):
     async with engine_async.begin() as conn:
         if drop:
-            logging.warning("!drop db")
+            logging.warning("[DB] DROP db")
             await conn.run_sync(Base.metadata.drop_all)
 
         await conn.run_sync(Base.metadata.create_all)
 
-        logging.warning(f"INIT {DATABASE_URL}; tables in metadata:")
         _table_names = [table_name for table_name in Base.metadata.tables.keys()]
-        for table_name in _table_names:
-            logging.warning(table_name)
+        _table_names = ", ".join(_table_names)
+        logging.warning(f"[DB] INIT {DATABASE_URL}; tables in metadata:\n"
+                        f"{_table_names}")
 
         # other METADATA
         # await conn.run_sync(metadata.create_all)

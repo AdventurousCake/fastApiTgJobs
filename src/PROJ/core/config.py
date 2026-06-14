@@ -57,7 +57,6 @@ TASK_EXECUTION_TIME_LIMIT = 60 * 5
 UNIQUE_FILTER = True
 IMG_SAVE = False
 TARGET_CHATS = [-1001328702818,
-                -1001049086457,
                 -1001154585596,
                 -1001292405242,
                 -1001650380394,
@@ -65,6 +64,5 @@ TARGET_CHATS = [-1001328702818,
                 -1001164103043,
                 -1001067529236, # python_jobs
                 ]
-TARGET_CHATS_TEST = [-1001328702818,
-                     -1001049086457, ]
+TARGET_CHATS_TEST = [-1001328702818]
 

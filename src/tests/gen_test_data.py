@@ -19,7 +19,7 @@ fake = Faker(locale=["ru_RU", "en_US"])
 #         return hr.model_dump()
 #     return hr
 
-def generate_fake_model_vd(dump=False, text_len=None) -> VacancyData | dict:
+def generate_fake_model_vd(dump=False, text_len=None) -> VacancyData | str:
     tg_url_schema = 'https://t.me/python_scripts_hr/' + str(random.randint(1000, 9999))
     tags_text = ['#vacancy', '#bigtech', '#remote', ' ']
     tags_text_str = ' '.join(tags_text)
