@@ -45,42 +45,12 @@ class ImageUploader:
 
             return 'https://telegra.ph' + response[0]['src']
 
-    async def _upload_to_catbox(self, f_bytes):
-        url = 'https://catbox.moe/user/api.php'
-        async with httpx.AsyncClient() as client:
-            files = {
-                'fileToUpload': ('img.jpg', f_bytes, 'image/jpeg')
-            }
-
-            data = {
-                'reqtype': 'fileupload',
-                'userhash': ''
-            }
-
-            try:
-                response = await client.post(url, files=files, data=data, timeout=10)
-                response.raise_for_status()
-            except httpx.HTTPStatusError as e:
-                logger.error(f"upload img status: {e.response.status_code}, response: {e.response.text}")
-                raise
-            except httpx.TimeoutException as e:
-                logger.error(f"upload img timeout: {e}")
-                raise
-            except Exception as e:
-                logger.error(f"upload img error: {e}")
-                raise
-
-            logger.warning(f"upload img status: {response.status_code}, response: {response}")
-            response = response.text
-            return response
-
     async def uploader(self, f_bytes):
         if not f_bytes:
             raise ValueError("File is empty")
 
         try:
             return await self._upload_to_tgraph(f_bytes)
-            # return await self._upload_to_catbox(f_bytes)
         except Exception as e:
             logging.error(msg=f'Error in upload img: {e}', exc_info=True)
             return 'err_upl'

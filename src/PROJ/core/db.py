@@ -60,7 +60,7 @@ async def init_models(drop=False):
 
         _table_names = [table_name for table_name in Base.metadata.tables.keys()]
         _table_names = ", ".join(_table_names)
-        logging.warning(f"[DB] INIT {DATABASE_URL}; tables in metadata:\n"
+        logging.warning(f"[DB] INIT {DATABASE_URL}; tables in metadata: "
                         f"{_table_names}")
 
         # other METADATA

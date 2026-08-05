@@ -122,7 +122,7 @@ class GTable:
 
         try:
             sh_target.delete_rows(2, sh_target.row_count)
-            log.warning(f'Done delete rows 2-{sh_target.row_count} in {sh_target.title}')
+            log.warning(f'Done DELETE rows 2-{sh_target.row_count} in {sh_target.title}')
         except APIError as e:
             logging.error(e, exc_info=True)
         except Exception as e:
@@ -142,10 +142,11 @@ class GTable:
         rows_count = len(prep_values)
         try:
             sh_target.insert_rows(values=prep_values, value_input_option=ValueInputOption.user_entered, row=TARGET_ROW)
+            log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
+
         except Exception as e:
             raise
 
-        log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
 
 @time_counter
 def g_table_main(data):
