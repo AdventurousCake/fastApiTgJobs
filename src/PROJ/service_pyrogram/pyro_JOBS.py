@@ -15,25 +15,25 @@ from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
 logger = logging.getLogger(__name__)
 
-proxy = {"scheme": "socks5",  # "socks4", "socks5" and "http" are supported
+PROXY = {"scheme": "socks5",  # "socks4", "socks5" and "http" are supported
          "hostname": "localhost",
          "port": 1080}
 if os.name == "nt":
-    proxy=None
+    PROXY=None
 
 
 class TelegramClient:
     def __init__(self, session_name: str = None, api_id: int = None, api_hash: str = None, phone_number: str = None,
                  password: str = None, session_string: str = None):
-        logger.info("using proxy: %s", proxy)
+        logger.info("using proxy: %s", PROXY)
 
         if not session_name:
             logger.warning("Created IN MEMORY session client")
-            self.client = Client(":memory:", session_string=session_string, proxy=proxy,
+            self.client = Client(":memory:", session_string=session_string, proxy=PROXY,
                                  no_updates=True)
         else:
             self.client = Client(session_name, api_id, api_hash, phone_number=phone_number, password=password,
-                                 proxy=proxy)
+                                 proxy=PROXY)
 
     async def __aenter__(self):
         try:
@@ -41,7 +41,7 @@ class TelegramClient:
             await self.client.start()
 
             c_data = await self.client.get_me()
-            logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}\n{proxy=}")
+            logger.warning(f"Userbot id: {c_data.id}; Name: {c_data.first_name}; {c_data.phone_number}\n{PROXY=}")
 
         except Exception as e:
             logger.error("Error initializing Telegram client with session string", exc_info=e)

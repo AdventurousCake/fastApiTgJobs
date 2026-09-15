@@ -157,10 +157,9 @@ class GTable:
 
         try:
             sh_target.insert_rows(values=prep_values, value_input_option=ValueInputOption.user_entered, row=TARGET_ROW)
+            log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
         except Exception as e:
             raise
-
-        log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
 
     def replace_vacancies(self, vacancies: list[VacancyData], sh_target_idx=DEFAULT_WORKSHEET_INDEX):
         sh_target = self.sh.get_worksheet(sh_target_idx)
@@ -173,7 +172,7 @@ class GTable:
         loaded_at = datetime.now(timezone.utc).isoformat()
 
         vacancies = [data_item.model_dump() for data_item in vacancies]
-        number_of_fields = len(vacancies[0].values() + 1)
+        number_of_fields = len(vacancies[0].values()) + 1
         end_column = self._column_letter(number_of_fields)
 
         prep_values = [list(d.values()) + [loaded_at] for d in vacancies]  # header_list = list(data[0].keys())
@@ -191,6 +190,13 @@ class GTable:
                 value_input_option=ValueInputOption.user_entered,
             )
 
+        log_data = (f'[cyan] TABLE INFO:\n'
+                    f'{pformat(self.get_info(), sort_dicts=False)}\n'
+                    f'{sh_target.column_count=}, {sh_target.row_count=}\n'
+                    f'{sh_target.frozen_row_count=}, {sh_target.frozen_col_count=}\n'
+                    f'>>> INSERT target: {sh_target.title};\n'
+                    f'[/]')
+        log.warning(log_data, extra={"markup": True})
 
 @time_counter
 def g_table_main(data):
