@@ -166,26 +166,22 @@ class GTable:
         if not sh_target.title == DEFAULT_WORKSHEET_NAME:
             raise ValueError(f'Only {DEFAULT_WORKSHEET_NAME} sheet can be updated. Current: {sh_target.title}')
 
-
-
         old_last_row = sh_target.row_count
         loaded_at = datetime.now(timezone.utc).isoformat()
 
         vacancies = [data_item.model_dump() for data_item in vacancies]
-        number_of_fields = len(vacancies[0].values()) + 1
+        number_of_fields = len(vacancies[0].values()) + 1 # + loaded_at
         end_column = self._column_letter(number_of_fields)
 
         prep_values = [list(d.values()) + [loaded_at] for d in vacancies]  # header_list = list(data[0].keys())
         rows_count = len(prep_values)
 
-        # Preserve row 1 as the header; clear only old data.
-        if old_last_row >= 2:
-            sh_target.batch_clear([f"A2:{end_column}{old_last_row}"])
+        sh_target.batch_clear([f"A1:{end_column}{old_last_row}"])
 
-        # Write the new data beginning at row 2.
+        # Write the new data beginning at row 1.
         if prep_values:
             sh_target.update(
-                range_name=f"A2:{end_column}{len(prep_values) + 1}",
+                range_name=f"A1:{end_column}{len(prep_values)}",
                 values=prep_values,
                 value_input_option=ValueInputOption.user_entered,
             )
