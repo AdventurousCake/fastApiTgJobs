@@ -2,8 +2,9 @@ import csv
 import logging
 import time
 from datetime import datetime
+from functools import wraps
 from pprint import pprint
-from typing import List
+from typing import List, Callable, Awaitable, TypeVar, Any
 
 import aiohttp
 import httpx
@@ -115,6 +116,26 @@ def time_counter(func):
     def wrapper(*args, **kwargs):
         start = time.time()
         res = func(*args, **kwargs)
-        logging.info(f"{func.__name__}. Time: {round(time.time() - start, 3)} s.")
+        logging.warning(f"{func.__name__}. Time: {round(time.time() - start, 3)} s.")
         return res
+    return wrapper
+
+
+T = TypeVar("T")
+
+def time_counter_async(
+    func: Callable[..., Awaitable[T]],
+) -> Callable[..., Awaitable[T]]:
+    @wraps(func)
+    async def wrapper(*args: Any, **kwargs: Any) -> T:
+        start = time.perf_counter()
+        try:
+            return await func(*args, **kwargs)
+        finally:
+            logging.warning(
+                "%s. Time: %.3f s.",
+                func.__name__,
+                time.perf_counter() - start,
+            )
+
     return wrapper

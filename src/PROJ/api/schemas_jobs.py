@@ -52,7 +52,7 @@ class VacancyData(BaseModel):
         if self.msg_url:
             return self.msg_url.split("/")[3]
 
-    def model_dump(self, **kwargs) -> str:
+    def model_dump(self, **kwargs) -> dict[str, str | int]:
         _INCLUDE_VALUES_SET = {'level', 'remote', 'text_', 'msg_url', 'contacts', 'user_username', 'posted_at', 'posted_at_ts'}
 
         # log.warning(f'{_INCLUDE_VALUES_SET=}\n'

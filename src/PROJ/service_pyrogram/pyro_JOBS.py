@@ -10,7 +10,7 @@ from pyrogram import Client
 from src.PROJ.api.schemas_jobs import VacancyData
 from src.PROJ.core.config import TG_SESSION_STRING, MSG_LIMIT, MSG_MIN_DATE, PASS_SENIORS_TMP, \
     TASK_EXECUTION_TIME_LIMIT, UNIQUE_FILTER, TARGET_CHATS, TARGET_CHATS_TEST, IMG_SAVE
-from src.PROJ.core.utils import ImageUploader, time_counter
+from src.PROJ.core.utils import ImageUploader, time_counter, time_counter_async
 from src.PROJ.service_pyrogram.pyro_msg_parser import MessageParser
 
 logger = logging.getLogger(__name__)
@@ -95,6 +95,7 @@ class ScrapeVacancies:
         self.target_chats = target_chats
 
     # @classmethod
+    @time_counter_async
     async def run(self) -> dict:
         """to get ids use forward to bot https://t.me/ShowJsonBot"""
 

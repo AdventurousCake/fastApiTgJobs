@@ -162,10 +162,41 @@ class GTable:
 
         log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
 
+    def replace_vacancies(self, vacancies: list[VacancyData], sh_target_idx=DEFAULT_WORKSHEET_INDEX):
+        sh_target = self.sh.get_worksheet(sh_target_idx)
+        if not sh_target.title == DEFAULT_WORKSHEET_NAME:
+            raise ValueError(f'Only {DEFAULT_WORKSHEET_NAME} sheet can be updated. Current: {sh_target.title}')
+
+
+
+        old_last_row = sh_target.row_count
+        loaded_at = datetime.now(timezone.utc).isoformat()
+
+        vacancies = [data_item.model_dump() for data_item in vacancies]
+        number_of_fields = len(vacancies[0].values() + 1)
+        end_column = self._column_letter(number_of_fields)
+
+        prep_values = [list(d.values()) + [loaded_at] for d in vacancies]  # header_list = list(data[0].keys())
+        rows_count = len(prep_values)
+
+        # Preserve row 1 as the header; clear only old data.
+        if old_last_row >= 2:
+            sh_target.batch_clear([f"A2:{end_column}{old_last_row}"])
+
+        # Write the new data beginning at row 2.
+        if prep_values:
+            sh_target.update(
+                range_name=f"A2:{end_column}{len(prep_values) + 1}",
+                values=prep_values,
+                value_input_option=ValueInputOption.user_entered,
+            )
+
+
 @time_counter
 def g_table_main(data):
     gt = GTable(spreadsheet_id=TABLE_ID_KEY)
-    gt.add_to_sheet_vacancydata(data)
+    gt.replace_vacancies(data)
+    # gt.add_to_sheet_vacancydata(data)
     log.info(f'Gtable process done!')
 
 
