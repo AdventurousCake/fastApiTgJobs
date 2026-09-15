@@ -1,4 +1,5 @@
 import pathlib
+from datetime import timezone, datetime
 from pprint import pprint, pformat
 import logging
 
@@ -25,9 +26,8 @@ log = logging.getLogger("rich")
 
 
 class GTable:
-    def __init__(self, spreadsheet_id: str = None, worksheet_index: int = None, from_file=False):
-        CREDENTIALS_FILE = "credentials.json"
-        CREDENTIALS_PATH = ROOT_DIR.joinpath(CREDENTIALS_FILE)
+    def __init__(self, spreadsheet_id: str, worksheet_index: int = None, from_file=False):
+        CREDENTIALS_PATH = ROOT_DIR / "credentials.json"
 
         if from_file and CREDENTIALS_PATH.exists():
             self.gc = gspread.service_account(filename=CREDENTIALS_PATH)
@@ -40,6 +40,14 @@ class GTable:
 
         self.sh: Spreadsheet = self.gc.open_by_key(spreadsheet_id)
         self.worksheet1: Worksheet = self.sh.sheet1
+
+    @staticmethod
+    def _column_letter(number: int) -> str:
+        result = ""
+        while number:
+            number, remainder = divmod(number - 1, 26)
+            result = chr(65 + remainder) + result
+        return result
 
     def _get_metadata(self):
         """returns numberFormat types"""
@@ -91,7 +99,12 @@ class GTable:
                     extra={"markup": True})
 
     def add_from_dataframe(self, dataframe):
-        self.worksheet1.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+        values = [dataframe.columns.tolist()] + dataframe.fillna("").values.tolist()
+        self.worksheet1.update(
+            range_name="A1",
+            values=values,
+            value_input_option=ValueInputOption.user_entered,
+        )
 
     def append(self, data):
         self.worksheet1.append_rows(values=[list(d.values()) for d in data],
@@ -106,11 +119,9 @@ class GTable:
         # check first item
         if isinstance(data[0], VacancyData):
             data = [data_item.model_dump() for data_item in data]
-            # data = [data_item.model_dump(mode='json', include=include_values_set) for data_item in data]
         else:
             raise ValueError('data must be list of VacancyData')
 
-        # show
         data_example = data[0].copy()
         data_example['text_'] = data_example['text_'][:20]
         log.warning(f"{data_example=}")
@@ -122,7 +133,8 @@ class GTable:
 
         try:
             sh_target.delete_rows(2, sh_target.row_count)
-            log.warning(f'Done DELETE rows 2-{sh_target.row_count} in {sh_target.title}')
+            log.warning(f'Done delete rows 2-{sh_target.row_count} in {sh_target.title}')
+
         except APIError as e:
             logging.error(e, exc_info=True)
         except Exception as e:
@@ -138,20 +150,53 @@ class GTable:
                     f'[/]')
         log.warning(log_data, extra={"markup": True})
 
-        prep_values = [list(d.values()) + ['=now()'] for d in data]  # header_list = list(data[0].keys())
+        loaded_at = datetime.now(timezone.utc).isoformat()
+
+        prep_values = [list(d.values()) + [loaded_at] for d in data]  # header_list = list(data[0].keys())
         rows_count = len(prep_values)
+
         try:
             sh_target.insert_rows(values=prep_values, value_input_option=ValueInputOption.user_entered, row=TARGET_ROW)
-            log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
-
         except Exception as e:
             raise
+
+        log.warning(f'✅ Done insert to {sh_target.title} (+{rows_count})')
+
+    def replace_vacancies(self, vacancies: list[VacancyData], sh_target_idx=DEFAULT_WORKSHEET_INDEX):
+        sh_target = self.sh.get_worksheet(sh_target_idx)
+        if not sh_target.title == DEFAULT_WORKSHEET_NAME:
+            raise ValueError(f'Only {DEFAULT_WORKSHEET_NAME} sheet can be updated. Current: {sh_target.title}')
+
+
+
+        old_last_row = sh_target.row_count
+        loaded_at = datetime.now(timezone.utc).isoformat()
+
+        vacancies = [data_item.model_dump() for data_item in vacancies]
+        number_of_fields = len(vacancies[0].values() + 1)
+        end_column = self._column_letter(number_of_fields)
+
+        prep_values = [list(d.values()) + [loaded_at] for d in vacancies]  # header_list = list(data[0].keys())
+        rows_count = len(prep_values)
+
+        # Preserve row 1 as the header; clear only old data.
+        if old_last_row >= 2:
+            sh_target.batch_clear([f"A2:{end_column}{old_last_row}"])
+
+        # Write the new data beginning at row 2.
+        if prep_values:
+            sh_target.update(
+                range_name=f"A2:{end_column}{len(prep_values) + 1}",
+                values=prep_values,
+                value_input_option=ValueInputOption.user_entered,
+            )
 
 
 @time_counter
 def g_table_main(data):
     gt = GTable(spreadsheet_id=TABLE_ID_KEY)
-    gt.add_to_sheet_vacancydata(data)
+    gt.replace_vacancies(data)
+    # gt.add_to_sheet_vacancydata(data)
     log.info(f'Gtable process done!')
 
 
