@@ -63,7 +63,7 @@ class TelegramClient:
     # parsed
     async def get_chat_data(self, chat_id: int, msg_limit: int) -> List[VacancyData]:
         chat_info = await self.client.get_chat(chat_id)
-        logger.warning(f"""Processing chat: {chat_info.title[:15]} - @{chat_info.username} ({chat_id})""")
+        logger.warning(f"""Processing chat: @{chat_info.username} {chat_info.title[:15]} ({chat_id})""")
 
         messages: List[VacancyData] = []
         messages_set_text_255 = []  # for check unique

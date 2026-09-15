@@ -1,4 +1,5 @@
 import pathlib
+from datetime import timezone, datetime
 from pprint import pprint, pformat
 import logging
 
@@ -25,9 +26,8 @@ log = logging.getLogger("rich")
 
 
 class GTable:
-    def __init__(self, spreadsheet_id: str = None, worksheet_index: int = None, from_file=False):
-        CREDENTIALS_FILE = "credentials.json"
-        CREDENTIALS_PATH = ROOT_DIR.joinpath(CREDENTIALS_FILE)
+    def __init__(self, spreadsheet_id: str, worksheet_index: int = None, from_file=False):
+        CREDENTIALS_PATH = ROOT_DIR / "credentials.json"
 
         if from_file and CREDENTIALS_PATH.exists():
             self.gc = gspread.service_account(filename=CREDENTIALS_PATH)
@@ -40,6 +40,14 @@ class GTable:
 
         self.sh: Spreadsheet = self.gc.open_by_key(spreadsheet_id)
         self.worksheet1: Worksheet = self.sh.sheet1
+
+    @staticmethod
+    def _column_letter(number: int) -> str:
+        result = ""
+        while number:
+            number, remainder = divmod(number - 1, 26)
+            result = chr(65 + remainder) + result
+        return result
 
     def _get_metadata(self):
         """returns numberFormat types"""
@@ -91,7 +99,12 @@ class GTable:
                     extra={"markup": True})
 
     def add_from_dataframe(self, dataframe):
-        self.worksheet1.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+        values = [dataframe.columns.tolist()] + dataframe.fillna("").values.tolist()
+        self.worksheet1.update(
+            range_name="A1",
+            values=values,
+            value_input_option=ValueInputOption.user_entered,
+        )
 
     def append(self, data):
         self.worksheet1.append_rows(values=[list(d.values()) for d in data],
@@ -106,11 +119,9 @@ class GTable:
         # check first item
         if isinstance(data[0], VacancyData):
             data = [data_item.model_dump() for data_item in data]
-            # data = [data_item.model_dump(mode='json', include=include_values_set) for data_item in data]
         else:
             raise ValueError('data must be list of VacancyData')
 
-        # show
         data_example = data[0].copy()
         data_example['text_'] = data_example['text_'][:20]
         log.warning(f"{data_example=}")
@@ -123,6 +134,7 @@ class GTable:
         try:
             sh_target.delete_rows(2, sh_target.row_count)
             log.warning(f'Done delete rows 2-{sh_target.row_count} in {sh_target.title}')
+
         except APIError as e:
             logging.error(e, exc_info=True)
         except Exception as e:
@@ -138,8 +150,11 @@ class GTable:
                     f'[/]')
         log.warning(log_data, extra={"markup": True})
 
-        prep_values = [list(d.values()) + ['=now()'] for d in data]  # header_list = list(data[0].keys())
+        loaded_at = datetime.now(timezone.utc).isoformat()
+
+        prep_values = [list(d.values()) + [loaded_at] for d in data]  # header_list = list(data[0].keys())
         rows_count = len(prep_values)
+
         try:
             sh_target.insert_rows(values=prep_values, value_input_option=ValueInputOption.user_entered, row=TARGET_ROW)
         except Exception as e:
