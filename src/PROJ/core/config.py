@@ -51,7 +51,7 @@ GOOGLE_CREDENTIALS_FILE_STR = os.getenv("GOOGLE_CREDENTIALS_FILE_STR", "{}")
 GOOGLE_CREDENTIALS_JSON = json.loads(GOOGLE_CREDENTIALS_FILE_STR)
 
 MSG_LIMIT = 500
-MSG_MIN_DATE = datetime.utcnow() - timedelta(days=31)  # datetime.now(UTC)
+MSG_MIN_DATE = datetime.now(UTC) - timedelta(days=31)
 PASS_SENIORS_TMP = True
 TASK_EXECUTION_TIME_LIMIT = 60 * 5
 UNIQUE_FILTER = True
