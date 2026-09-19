@@ -49,7 +49,7 @@ def generate_fake_model_vd(dump=False, text_len=None) -> VacancyData | str:
     )
     logging.warning(f"vd: {vd}")
     if dump:
-        return vd.model_dump()
+        return vd.model_dump_to_sheet_dict()
     return vd
 
 

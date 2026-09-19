@@ -73,6 +73,10 @@ class GTable:
         logging.warning(f"{metadata=}")
         return worksheet_info
 
+    def get(self):
+        """Raw data, strings"""
+        return self.worksheet1.get_all_values()
+
     def get_all_from2row(self):
         # ValueRenderOption: FORMATTED_VALUE, UNFORMATTED_VALUE, FORMULA
         return self.worksheet1.get_all_records(head=2)
@@ -118,7 +122,7 @@ class GTable:
 
         # check first item
         if isinstance(data[0], VacancyData):
-            data = [data_item.model_dump() for data_item in data]
+            data = [data_item.model_dump_to_sheet_dict() for data_item in data]
         else:
             raise ValueError('data must be list of VacancyData')
 
@@ -169,7 +173,7 @@ class GTable:
         old_last_row = sh_target.row_count
         loaded_at = datetime.now(timezone.utc).isoformat()
 
-        vacancies = [data_item.model_dump() for data_item in vacancies]
+        vacancies = [data_item.model_dump_to_sheet_dict() for data_item in vacancies]
         number_of_fields = len(vacancies[0].values()) + 1 # + loaded_at
         end_column = self._column_letter(number_of_fields)
 
@@ -178,12 +182,13 @@ class GTable:
 
         sh_target.batch_clear([f"A1:{end_column}{old_last_row}"])
 
-        # Write the new data beginning at row 1.
+        # Write row 1
         if prep_values:
             sh_target.update(
                 range_name=f"A1:{end_column}{len(prep_values)}",
                 values=prep_values,
-                value_input_option=ValueInputOption.user_entered,
+                # value_input_option=ValueInputOption.user_entered,
+                value_input_option=ValueInputOption.raw,
             )
 
         log_data = (f'[cyan] TABLE INFO:\n'

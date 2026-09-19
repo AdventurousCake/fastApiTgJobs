@@ -29,7 +29,7 @@ class DataSaver:
             writer = csv.DictWriter(f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
             writer.writeheader()
             for row in data:
-                writer.writerow(row.model_dump())
+                writer.writerow(row.model_dump_to_sheet_dict())
 
         logger.info(f"Done, CSV saved {len(data)} rows. File: {filename}")
 
