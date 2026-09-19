@@ -1,7 +1,7 @@
 fastapi[all]==0.135
 fastapi-users[sqlalchemy]
 uvicorn[standard]~=0.46
-alembic~=1.13
+alembic~=1.20
 asyncpg~=0.29
 sqlalchemy~=2.0
 #psycopg2-binary
@@ -11,8 +11,8 @@ aioredis
 jinja2
 beautifulsoup4
 plotly
-rich~=14.3
-pytest>=9.0.3
+rich~=15.0
+pytest
 pytest_asyncio
 slowapi~=0.1
 sqladmin[full]~=0.24
@@ -33,7 +33,7 @@ httpx~=0.28
 bcrypt
 #pandas~=2.2.2
 openpyxl~=3.1.5
-gspread~=6.2
+gspread~=6.2.1
 
 TgCrypto-pyrofork==1.2.8
 pyrogram~=2.0.106

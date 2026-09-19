@@ -11,7 +11,7 @@ from src.PROJ.service_pyrogram.pyro_JOBS import ScrapeVacancies
 
 async def run(session: AsyncSession = Depends(get_async_session)):
     data = await ScrapeVacancies().run()
-    data_jobs = [m.model_dump() for m in data.get("all_messages")]
+    data_jobs = [m.model_dump_to_sheet_dict() for m in data.get("all_messages")]
     data_hrs = data.get("hr_data")
 
     await JobsDataRepository().clean_isnew_flag(session)

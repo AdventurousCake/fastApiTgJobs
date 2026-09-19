@@ -2,8 +2,9 @@ import csv
 import logging
 import time
 from datetime import datetime
+from functools import wraps
 from pprint import pprint
-from typing import List
+from typing import List, Callable, Awaitable, TypeVar, Any
 
 import aiohttp
 import httpx
@@ -28,7 +29,7 @@ class DataSaver:
             writer = csv.DictWriter(f, fieldnames=header, quoting=csv.QUOTE_MINIMAL)
             writer.writeheader()
             for row in data:
-                writer.writerow(row.model_dump())
+                writer.writerow(row.model_dump_to_sheet_dict())
 
         logger.info(f"Done, CSV saved {len(data)} rows. File: {filename}")
 
@@ -45,42 +46,12 @@ class ImageUploader:
 
             return 'https://telegra.ph' + response[0]['src']
 
-    async def _upload_to_catbox(self, f_bytes):
-        url = 'https://catbox.moe/user/api.php'
-        async with httpx.AsyncClient() as client:
-            files = {
-                'fileToUpload': ('img.jpg', f_bytes, 'image/jpeg')
-            }
-
-            data = {
-                'reqtype': 'fileupload',
-                'userhash': ''
-            }
-
-            try:
-                response = await client.post(url, files=files, data=data, timeout=10)
-                response.raise_for_status()
-            except httpx.HTTPStatusError as e:
-                logger.error(f"upload img status: {e.response.status_code}, response: {e.response.text}")
-                raise
-            except httpx.TimeoutException as e:
-                logger.error(f"upload img timeout: {e}")
-                raise
-            except Exception as e:
-                logger.error(f"upload img error: {e}")
-                raise
-
-            logger.warning(f"upload img status: {response.status_code}, response: {response}")
-            response = response.text
-            return response
-
     async def uploader(self, f_bytes):
         if not f_bytes:
             raise ValueError("File is empty")
 
         try:
             return await self._upload_to_tgraph(f_bytes)
-            # return await self._upload_to_catbox(f_bytes)
         except Exception as e:
             logging.error(msg=f'Error in upload img: {e}', exc_info=True)
             return 'err_upl'
@@ -115,6 +86,26 @@ def time_counter(func):
     def wrapper(*args, **kwargs):
         start = time.time()
         res = func(*args, **kwargs)
-        logging.info(f"{func.__name__}. Time: {round(time.time() - start, 3)} s.")
+        logging.warning(f"{func.__name__}. Time: {round(time.time() - start, 3)} s.")
         return res
+    return wrapper
+
+
+T = TypeVar("T")
+
+def time_counter_async(
+    func: Callable[..., Awaitable[T]],
+) -> Callable[..., Awaitable[T]]:
+    @wraps(func)
+    async def wrapper(*args: Any, **kwargs: Any) -> T:
+        start = time.perf_counter()
+        try:
+            return await func(*args, **kwargs)
+        finally:
+            logging.warning(
+                "%s. Time: %.3f s.",
+                func.__name__,
+                time.perf_counter() - start,
+            )
+
     return wrapper
