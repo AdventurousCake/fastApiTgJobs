@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import itertools
 import logging
 from typing import List
@@ -70,7 +70,7 @@ class TelegramClient:
 
         async for message in self.client.get_chat_history(chat_id, limit=msg_limit):
             # pre filter + unique
-            if message.date < MSG_MIN_DATE:
+            if message.date.astimezone(timezone.utc) < MSG_MIN_DATE:
                 continue
 
             parsed_message = await MessageParser().parse_message(message, chat_info.username)
@@ -123,6 +123,8 @@ class ScrapeVacancies:
             # await выполнения функций, return:list of results [[VacancyData, ...]]
             chat_results: List[List[VacancyData] | Exception] = await asyncio.gather(*tasks, return_exceptions=True)
 
+            if chat_results and isinstance(chat_results[0], Exception):
+                raise chat_results[0]
             chat_results_flat = list(itertools.chain(*chat_results))
 
             if IMG_SAVE:

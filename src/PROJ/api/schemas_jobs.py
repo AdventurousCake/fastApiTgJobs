@@ -11,7 +11,7 @@ class VacancyData(BaseModel):
     """v1909"""
     model_config = ConfigDict(
         extra="ignore",
-        frozen=True,
+        # frozen=True,
     )
 
     level: bool # Literal["junior", "middle", "senior", "lead"]
@@ -24,7 +24,7 @@ class VacancyData(BaseModel):
     posted_at: datetime
     msg_url: str
     chat_username: str
-    chat_id: int = Field(gt=0)
+    chat_id: int
     views: Optional[int]
     button_url: Optional[str] = Field(default=None) # exclude=True
     user_tg_id: Optional[int] = Field(default=None)
